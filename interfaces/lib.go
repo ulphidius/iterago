@@ -1,4 +1,4 @@
-package iterago
+package interfaces
 
 import "errors"
 

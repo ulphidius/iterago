@@ -4,45 +4,45 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/ulphidius/iterago"
+	"github.com/ulphidius/iterago/interfaces"
 )
 
 func TestNext(t *testing.T) {
 	tests := []struct {
 		name   string
 		fields *Iterator[uint]
-		want   iterago.Option[*Iterator[uint]]
+		want   interfaces.Option[*Iterator[uint]]
 	}{
 		{
 			name: "OK",
 			fields: &Iterator[uint]{
 				current: 0,
-				next: iterago.Option[*Iterator[uint]]{
-					Status: iterago.Some,
+				next: interfaces.Option[*Iterator[uint]]{
+					Status: interfaces.Some,
 					Value: &Iterator[uint]{
 						current: 10,
-						next: iterago.Option[*Iterator[uint]]{
-							Status: iterago.Some,
+						next: interfaces.Option[*Iterator[uint]]{
+							Status: interfaces.Some,
 							Value: &Iterator[uint]{
 								current: 5,
-								next: iterago.Option[*Iterator[uint]]{
-									Status: iterago.None,
+								next: interfaces.Option[*Iterator[uint]]{
+									Status: interfaces.None,
 								},
 							},
 						},
 					},
 				},
 			},
-			want: iterago.Option[*Iterator[uint]]{
-				Status: iterago.Some,
+			want: interfaces.Option[*Iterator[uint]]{
+				Status: interfaces.Some,
 				Value: &Iterator[uint]{
 					current: 10,
-					next: iterago.Option[*Iterator[uint]]{
-						Status: iterago.Some,
+					next: interfaces.Option[*Iterator[uint]]{
+						Status: interfaces.Some,
 						Value: &Iterator[uint]{
 							current: 5,
-							next: iterago.Option[*Iterator[uint]]{
-								Status: iterago.None,
+							next: interfaces.Option[*Iterator[uint]]{
+								Status: interfaces.None,
 							},
 						},
 					},
@@ -53,19 +53,19 @@ func TestNext(t *testing.T) {
 			name: "none next",
 			fields: &Iterator[uint]{
 				current: 0,
-				next: iterago.Option[*Iterator[uint]]{
-					Status: iterago.None,
+				next: interfaces.Option[*Iterator[uint]]{
+					Status: interfaces.None,
 				},
 			},
-			want: iterago.Option[*Iterator[uint]]{
-				Status: iterago.None,
+			want: interfaces.Option[*Iterator[uint]]{
+				Status: interfaces.None,
 			},
 		},
 		{
 			name:   "nil iterator",
 			fields: nil,
-			want: iterago.Option[*Iterator[uint]]{
-				Status: iterago.None,
+			want: interfaces.Option[*Iterator[uint]]{
+				Status: interfaces.None,
 			},
 		},
 	}
@@ -87,12 +87,12 @@ func TestHasNext(t *testing.T) {
 			name: "OK",
 			fields: &Iterator[uint]{
 				current: 0,
-				next: iterago.Option[*Iterator[uint]]{
-					Status: iterago.Some,
+				next: interfaces.Option[*Iterator[uint]]{
+					Status: interfaces.Some,
 					Value: &Iterator[uint]{
 						current: 10,
-						next: iterago.Option[*Iterator[uint]]{
-							Status: iterago.None,
+						next: interfaces.Option[*Iterator[uint]]{
+							Status: interfaces.None,
 						},
 					},
 				},
@@ -103,8 +103,8 @@ func TestHasNext(t *testing.T) {
 			name: "none next value",
 			fields: &Iterator[uint]{
 				current: 0,
-				next: iterago.Option[*Iterator[uint]]{
-					Status: iterago.None,
+				next: interfaces.Option[*Iterator[uint]]{
+					Status: interfaces.None,
 				},
 			},
 			want: false,
@@ -136,24 +136,24 @@ func TestSliceUintIntoIter(t *testing.T) {
 			args: []uint{0, 2, 1, 5, 10},
 			want: &Iterator[uint]{
 				current: 0,
-				next: iterago.Option[*Iterator[uint]]{
-					Status: iterago.Some,
+				next: interfaces.Option[*Iterator[uint]]{
+					Status: interfaces.Some,
 					Value: &Iterator[uint]{
 						current: 2,
-						next: iterago.Option[*Iterator[uint]]{
-							Status: iterago.Some,
+						next: interfaces.Option[*Iterator[uint]]{
+							Status: interfaces.Some,
 							Value: &Iterator[uint]{
 								current: 1,
-								next: iterago.Option[*Iterator[uint]]{
-									Status: iterago.Some,
+								next: interfaces.Option[*Iterator[uint]]{
+									Status: interfaces.Some,
 									Value: &Iterator[uint]{
 										current: 5,
-										next: iterago.Option[*Iterator[uint]]{
-											Status: iterago.Some,
+										next: interfaces.Option[*Iterator[uint]]{
+											Status: interfaces.Some,
 											Value: &Iterator[uint]{
 												current: 10,
-												next: iterago.Option[*Iterator[uint]]{
-													Status: iterago.None,
+												next: interfaces.Option[*Iterator[uint]]{
+													Status: interfaces.None,
 												},
 											},
 										},
@@ -170,14 +170,14 @@ func TestSliceUintIntoIter(t *testing.T) {
 			args: []uint{0},
 			want: &Iterator[uint]{
 				current: 0,
-				next:    iterago.NewNoneOption[*Iterator[uint]](),
+				next:    interfaces.NewNoneOption[*Iterator[uint]](),
 			},
 		},
 		{
 			name:         "no value",
 			args:         nil,
 			wantErr:      true,
-			errorMessage: iterago.ErrUnwrapNoneOption,
+			errorMessage: interfaces.ErrUnwrapNoneOption,
 		},
 	}
 
