@@ -36,7 +36,52 @@ func TestNext(t *testing.T) {
 			want: interfaces.Option[*Iterator[uint]]{
 				Status: interfaces.Some,
 				Value: &Iterator[uint]{
+					current: 0,
+					cursor:  1,
+					next: interfaces.Option[*Iterator[uint]]{
+						Status: interfaces.Some,
+						Value: &Iterator[uint]{
+							current: 10,
+							next: interfaces.Option[*Iterator[uint]]{
+								Status: interfaces.Some,
+								Value: &Iterator[uint]{
+									current: 5,
+									next: interfaces.Option[*Iterator[uint]]{
+										Status: interfaces.None,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "OK - after first next call",
+			fields: &Iterator[uint]{
+				current: 0,
+				cursor:  1,
+				next: interfaces.Option[*Iterator[uint]]{
+					Status: interfaces.Some,
+					Value: &Iterator[uint]{
+						current: 10,
+						next: interfaces.Option[*Iterator[uint]]{
+							Status: interfaces.Some,
+							Value: &Iterator[uint]{
+								current: 5,
+								next: interfaces.Option[*Iterator[uint]]{
+									Status: interfaces.None,
+								},
+							},
+						},
+					},
+				},
+			},
+			want: interfaces.Option[*Iterator[uint]]{
+				Status: interfaces.Some,
+				Value: &Iterator[uint]{
 					current: 10,
+					cursor:  2,
 					next: interfaces.Option[*Iterator[uint]]{
 						Status: interfaces.Some,
 						Value: &Iterator[uint]{
@@ -53,6 +98,7 @@ func TestNext(t *testing.T) {
 			name: "none next",
 			fields: &Iterator[uint]{
 				current: 0,
+				cursor:  1,
 				next: interfaces.Option[*Iterator[uint]]{
 					Status: interfaces.None,
 				},
@@ -72,7 +118,8 @@ func TestNext(t *testing.T) {
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			assert.Equal(t, testCase.want, testCase.fields.Next())
+			result := testCase.fields.Next()
+			assert.Equal(t, testCase.want, result)
 		})
 	}
 }
