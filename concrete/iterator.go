@@ -5,26 +5,16 @@ import "github.com/ulphidius/iterago/interfaces"
 type Iterator[T any] struct {
 	current T
 	next    interfaces.Option[*Iterator[T]]
-	cursor  uint
 }
 
 func (iter *Iterator[T]) Next() interfaces.Option[*Iterator[T]] {
-	if iter == nil {
+	if iter == nil || !iter.HasNext() {
 		return interfaces.NewNoneOption[*Iterator[T]]()
 	}
 
-	if iter.cursor == 0 {
-		iter.cursor += 1
-		return interfaces.NewOption(iter)
-	}
+	next, _ := iter.next.Unwrap()
 
-	if iter.HasNext() {
-		next, _ := iter.next.Unwrap()
-		next.cursor = iter.cursor + 1
-		return iter.next
-	}
-
-	return interfaces.NewNoneOption[*Iterator[T]]()
+	return interfaces.NewOption(next)
 }
 
 func (iter *Iterator[T]) HasNext() bool {
@@ -33,6 +23,31 @@ func (iter *Iterator[T]) HasNext() bool {
 	}
 
 	return iter.next.IsSome()
+}
+
+func (iter *Iterator[T]) Filter(predicate func(T) bool) interfaces.Option[*Filtered[T]] {
+	if iter == nil {
+		return interfaces.NewNoneOption[*Filtered[T]]()
+	}
+
+	if !iter.HasNext() {
+		return interfaces.NewOption(
+			&Filtered[T]{
+				current:    iter.current,
+				next:       interfaces.NewNoneOption[*Filtered[T]](),
+				predicates: []func(T) bool{predicate},
+			},
+		)
+	}
+	next, _ := iter.Next().Unwrap()
+
+	return interfaces.NewOption(
+		&Filtered[T]{
+			current:    iter.current,
+			next:       next.Filter(predicate),
+			predicates: []func(T) bool{predicate},
+		},
+	)
 }
 
 func SliceUintIntoIter(values []uint) interfaces.Option[*Iterator[uint]] {

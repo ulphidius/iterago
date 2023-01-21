@@ -7,7 +7,7 @@ import (
 	"github.com/ulphidius/iterago/interfaces"
 )
 
-func TestNext(t *testing.T) {
+func TestIteratorNext(t *testing.T) {
 	tests := []struct {
 		name   string
 		fields *Iterator[uint]
@@ -36,52 +36,7 @@ func TestNext(t *testing.T) {
 			want: interfaces.Option[*Iterator[uint]]{
 				Status: interfaces.Some,
 				Value: &Iterator[uint]{
-					current: 0,
-					cursor:  1,
-					next: interfaces.Option[*Iterator[uint]]{
-						Status: interfaces.Some,
-						Value: &Iterator[uint]{
-							current: 10,
-							next: interfaces.Option[*Iterator[uint]]{
-								Status: interfaces.Some,
-								Value: &Iterator[uint]{
-									current: 5,
-									next: interfaces.Option[*Iterator[uint]]{
-										Status: interfaces.None,
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		{
-			name: "OK - after first next call",
-			fields: &Iterator[uint]{
-				current: 0,
-				cursor:  1,
-				next: interfaces.Option[*Iterator[uint]]{
-					Status: interfaces.Some,
-					Value: &Iterator[uint]{
-						current: 10,
-						next: interfaces.Option[*Iterator[uint]]{
-							Status: interfaces.Some,
-							Value: &Iterator[uint]{
-								current: 5,
-								next: interfaces.Option[*Iterator[uint]]{
-									Status: interfaces.None,
-								},
-							},
-						},
-					},
-				},
-			},
-			want: interfaces.Option[*Iterator[uint]]{
-				Status: interfaces.Some,
-				Value: &Iterator[uint]{
 					current: 10,
-					cursor:  2,
 					next: interfaces.Option[*Iterator[uint]]{
 						Status: interfaces.Some,
 						Value: &Iterator[uint]{
@@ -98,7 +53,6 @@ func TestNext(t *testing.T) {
 			name: "none next",
 			fields: &Iterator[uint]{
 				current: 0,
-				cursor:  1,
 				next: interfaces.Option[*Iterator[uint]]{
 					Status: interfaces.None,
 				},
@@ -124,7 +78,7 @@ func TestNext(t *testing.T) {
 	}
 }
 
-func TestHasNext(t *testing.T) {
+func TestIteratorHasNext(t *testing.T) {
 	tests := []struct {
 		name   string
 		fields *Iterator[uint]
@@ -166,6 +120,108 @@ func TestHasNext(t *testing.T) {
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
 			assert.Equal(t, testCase.want, testCase.fields.HasNext())
+		})
+	}
+}
+
+func TestIteratorFilter(t *testing.T) {
+	upperThan2 := func(u uint) bool { return u > 2 }
+
+	tests := []struct {
+		name   string
+		fields *Iterator[uint]
+		args   func(x uint) bool
+		want   interfaces.Option[*Filtered[uint]]
+	}{
+		{
+			name: "OK",
+			fields: &Iterator[uint]{
+				current: 0,
+				next: interfaces.Option[*Iterator[uint]]{
+					Status: interfaces.Some,
+					Value: &Iterator[uint]{
+						current: 10,
+						next: interfaces.Option[*Iterator[uint]]{
+							Status: interfaces.Some,
+							Value: &Iterator[uint]{
+								current: 5,
+								next: interfaces.Option[*Iterator[uint]]{
+									Status: interfaces.None,
+								},
+							},
+						},
+					},
+				},
+			},
+			args: upperThan2,
+			want: interfaces.NewOption(&Filtered[uint]{
+				current: 0,
+				next: interfaces.Option[*Filtered[uint]]{
+					Status: interfaces.Some,
+					Value: &Filtered[uint]{
+						current: 10,
+						next: interfaces.Option[*Filtered[uint]]{
+							Status: interfaces.Some,
+							Value: &Filtered[uint]{
+								current: 5,
+								next: interfaces.Option[*Filtered[uint]]{
+									Status: interfaces.None,
+								},
+								predicates: []func(uint) bool{upperThan2},
+							},
+						},
+						predicates: []func(uint) bool{upperThan2},
+					},
+				},
+				predicates: []func(uint) bool{upperThan2},
+			}),
+		},
+		{
+			name: "none next",
+			fields: &Iterator[uint]{
+				current: 0,
+				next: interfaces.Option[*Iterator[uint]]{
+					Status: interfaces.None,
+				},
+			},
+			args: upperThan2,
+			want: interfaces.Option[*Filtered[uint]]{
+				Status: interfaces.Some,
+				Value: &Filtered[uint]{
+					current: 0,
+					next: interfaces.Option[*Filtered[uint]]{
+						Status: interfaces.None,
+					},
+					predicates: []func(uint) bool{upperThan2},
+				},
+			},
+		},
+		{
+			name:   "nil iterator",
+			fields: nil,
+			want: interfaces.Option[*Filtered[uint]]{
+				Status: interfaces.None,
+			},
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			result := testCase.fields.Filter(testCase.args)
+
+			if testCase.want.IsNone() {
+				assert.Equal(t, testCase.want, result)
+				return
+			}
+
+			expected, _ := testCase.want.Unwrap()
+
+			for result.IsSome() {
+				result2, _ := result.Unwrap()
+				assert.True(t, result2.equal(expected))
+				result = result2.Next()
+				expected, _ = expected.Next().Unwrap()
+			}
 		})
 	}
 }
