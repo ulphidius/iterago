@@ -226,6 +226,57 @@ func TestIteratorFilter(t *testing.T) {
 	}
 }
 
+func TestIteractorCollect(t *testing.T) {
+	tests := []struct {
+		name   string
+		fields *Iterator[uint]
+		want   []uint
+	}{
+		{
+			name: "OK",
+			fields: &Iterator[uint]{
+				current: 0,
+				next: interfaces.Option[*Iterator[uint]]{
+					Status: interfaces.Some,
+					Value: &Iterator[uint]{
+						current: 10,
+						next: interfaces.Option[*Iterator[uint]]{
+							Status: interfaces.Some,
+							Value: &Iterator[uint]{
+								current: 5,
+								next: interfaces.Option[*Iterator[uint]]{
+									Status: interfaces.None,
+								},
+							},
+						},
+					},
+				},
+			},
+			want: []uint{0, 10, 5},
+		},
+		{
+			name: "OK - Single value",
+			fields: &Iterator[uint]{
+				current: 0,
+				next:    interfaces.NewNoneOption[*Iterator[uint]](),
+			},
+			want: []uint{0},
+		},
+		{
+			name:   "nil value",
+			fields: nil,
+			want:   nil,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			result := testCase.fields.Collect()
+			assert.Equal(t, testCase.want, result)
+		})
+	}
+}
+
 func TestSliceUintIntoIter(t *testing.T) {
 	tests := []struct {
 		name         string

@@ -32,22 +32,35 @@ func (iter *Iterator[T]) Filter(predicate func(T) bool) interfaces.Option[*Filte
 
 	if !iter.HasNext() {
 		return interfaces.NewOption(
-			&Filtered[T]{
-				current:    iter.current,
-				next:       interfaces.NewNoneOption[*Filtered[T]](),
-				predicates: []func(T) bool{predicate},
-			},
+			NewFilteredItem(
+				iter.current,
+				interfaces.NewNoneOption[*Filtered[T]](),
+				predicate,
+			),
 		)
 	}
 	next, _ := iter.Next().Unwrap()
 
 	return interfaces.NewOption(
-		&Filtered[T]{
-			current:    iter.current,
-			next:       next.Filter(predicate),
-			predicates: []func(T) bool{predicate},
-		},
+		NewFilteredItem(
+			iter.current,
+			next.Filter(predicate),
+			predicate,
+		),
 	)
+}
+
+func (iter *Iterator[T]) Collect() []T {
+	if iter == nil {
+		return nil
+	}
+
+	if iter.HasNext() {
+		next, _ := iter.Next().Unwrap()
+		return append([]T{iter.current}, next.Collect()...)
+	}
+
+	return []T{iter.current}
 }
 
 func SliceUintIntoIter(values []uint) interfaces.Option[*Iterator[uint]] {
