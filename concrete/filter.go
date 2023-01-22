@@ -11,6 +11,19 @@ type Filtered[T any] struct {
 	validated  bool
 }
 
+func NewFilteredItem[T any](
+	value T,
+	next interfaces.Option[*Filtered[T]],
+	predicate func(x T) bool,
+) *Filtered[T] {
+	return &Filtered[T]{
+		current:    value,
+		next:       next,
+		predicates: []func(T) bool{predicate},
+		validated:  predicate(value),
+	}
+}
+
 func (iter *Filtered[T]) Next() interfaces.Option[*Filtered[T]] {
 	if iter == nil || !iter.HasNext() {
 		return interfaces.NewNoneOption[*Filtered[T]]()
@@ -33,6 +46,26 @@ func (iter *Filtered[T]) HasNext() bool {
 	}
 
 	return iter.next.IsSome()
+}
+
+func (iter *Filtered[T]) Collect() []T {
+	if iter == nil {
+		return nil
+	}
+
+	if iter.HasNext() {
+		next, _ := iter.Next().Unwrap()
+		if iter.validated {
+			return append([]T{iter.current}, next.Collect()...)
+		}
+		return next.Collect()
+	}
+
+	if iter.validated {
+		return []T{iter.current}
+	}
+
+	return nil
 }
 
 func (iter *Filtered[T]) equal(value *Filtered[T]) bool {
