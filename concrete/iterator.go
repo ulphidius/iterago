@@ -1,6 +1,8 @@
 package concrete
 
-import "github.com/ulphidius/iterago/interfaces"
+import (
+	"github.com/ulphidius/iterago/interfaces"
+)
 
 type Iterator[T any] struct {
 	current T
@@ -48,6 +50,9 @@ func (iter *Iterator[T]) Filter(predicate func(T) bool) interfaces.Option[*Filte
 			predicate,
 		),
 	)
+}
+
+func (iter *Iterator[T]) Map(predicate func(T) interface{}) interfaces.Option[*Mapper[T, interface{}]] {
 }
 
 func (iter *Iterator[T]) Collect() []T {
