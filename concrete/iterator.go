@@ -41,6 +41,7 @@ func (iter *Iterator[T]) Filter(predicate func(T) bool) interfaces.Option[*Filte
 			),
 		)
 	}
+
 	next, _ := iter.Next().Unwrap()
 
 	return interfaces.NewOption(
@@ -52,7 +53,30 @@ func (iter *Iterator[T]) Filter(predicate func(T) bool) interfaces.Option[*Filte
 	)
 }
 
-func (iter *Iterator[T]) Map(predicate func(T) interface{}) interfaces.Option[*Mapper[T, interface{}]] {
+func (iter *Iterator[T]) Map(predicate func(T) any) interfaces.Option[*Mapper[T, any]] {
+	if iter == nil {
+		return interfaces.NewNoneOption[*Mapper[T, any]]()
+	}
+
+	if !iter.HasNext() {
+		return interfaces.NewOption(
+			NewMapperItem(
+				iter.current,
+				interfaces.NewNoneOption[*Mapper[T, any]](),
+				predicate,
+			),
+		)
+	}
+
+	next, _ := iter.Next().Unwrap()
+
+	return interfaces.NewOption(
+		NewMapperItem(
+			iter.current,
+			next.Map(predicate),
+			predicate,
+		),
+	)
 }
 
 func (iter *Iterator[T]) Collect() []T {

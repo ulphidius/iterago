@@ -48,6 +48,40 @@ func (iter *Filtered[T]) HasNext() bool {
 	return iter.next.IsSome()
 }
 
+func (iter *Filtered[T]) Map(predicate func(T) any) interfaces.Option[*Mapper[T, any]] {
+	if iter == nil {
+		return interfaces.NewNoneOption[*Mapper[T, any]]()
+	}
+
+	if !iter.HasNext() {
+		if iter.validated {
+			return interfaces.NewOption(
+				NewMapperItem(
+					iter.current,
+					interfaces.NewNoneOption[*Mapper[T, any]](),
+					predicate,
+				),
+			)
+		}
+
+		return interfaces.NewNoneOption[*Mapper[T, any]]()
+	}
+
+	next, _ := iter.Next().Unwrap()
+
+	if iter.validated {
+		return interfaces.NewOption(
+			NewMapperItem(
+				iter.current,
+				next.Map(predicate),
+				predicate,
+			),
+		)
+	}
+
+	return next.Map(predicate)
+}
+
 func (iter *Filtered[T]) Collect() []T {
 	if iter == nil {
 		return nil
