@@ -125,7 +125,3 @@ func (iter *Filtered[T]) equal(value *Filtered[T]) bool {
 		predicateResult
 
 }
-
-func compare(a interface{}, b interface{}) bool {
-	return a == b
-}

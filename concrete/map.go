@@ -1,6 +1,10 @@
 package concrete
 
-import "github.com/ulphidius/iterago/interfaces"
+import (
+	"fmt"
+
+	"github.com/ulphidius/iterago/interfaces"
+)
 
 type Mapper[T any, G any] struct {
 	current   T
@@ -28,7 +32,7 @@ func (iter *Mapper[T, G]) Next() interfaces.Option[*Mapper[T, G]] {
 	}
 
 	next, _ := iter.next.Unwrap()
-	iter.transform = iter.predicate(next.current)
+	next.transform = iter.predicate(next.current)
 
 	return interfaces.NewOption(next)
 }
@@ -116,4 +120,20 @@ func (iter *Mapper[T, G]) Collect() []G {
 	}
 
 	return []G{iter.transform}
+}
+
+func (iter *Mapper[T, G]) equal(value *Mapper[T, G]) bool {
+	if iter == nil && value == nil {
+		return true
+	}
+
+	next := (iter.HasNext() && value.HasNext()) || (!iter.HasNext() && !value.HasNext())
+
+	predicateResult := fmt.Sprintf("%v", iter.predicate(iter.current)) == fmt.Sprintf("%v", value.predicate(value.current))
+
+	return compare(value.current, iter.current) &&
+		compare(value.transform, value.transform) &&
+		next &&
+		predicateResult
+
 }

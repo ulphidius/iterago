@@ -104,3 +104,16 @@ func SliceUintIntoIter(values []uint) interfaces.Option[*Iterator[uint]] {
 		},
 	)
 }
+
+func SliceIntoIter[T any](values []T) interfaces.Option[*Iterator[T]] {
+	if len(values) == 0 {
+		return interfaces.NewNoneOption[*Iterator[T]]()
+	}
+
+	return interfaces.NewOption(
+		&Iterator[T]{
+			current: values[0],
+			next:    SliceIntoIter(values[1:]),
+		},
+	)
+}
