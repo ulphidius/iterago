@@ -9,6 +9,11 @@ const (
 	Some
 )
 
+type Iterator[T any] interface {
+	Next() Option[T]
+	HasNext() bool
+}
+
 type Option[T any] struct {
 	Status Optional
 	Value  T
@@ -41,9 +46,4 @@ func (opt Option[T]) Unwrap() (T, error) {
 	}
 
 	return opt.Value, nil
-}
-
-type Iterator[T any] interface {
-	Next() Option[T]
-	HasNext() bool
 }

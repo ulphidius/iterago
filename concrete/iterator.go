@@ -1,6 +1,8 @@
 package concrete
 
-import "github.com/ulphidius/iterago/interfaces"
+import (
+	"github.com/ulphidius/iterago/interfaces"
+)
 
 type Iterator[T any] struct {
 	current T
@@ -39,12 +41,39 @@ func (iter *Iterator[T]) Filter(predicate func(T) bool) interfaces.Option[*Filte
 			),
 		)
 	}
+
 	next, _ := iter.Next().Unwrap()
 
 	return interfaces.NewOption(
 		NewFilteredItem(
 			iter.current,
 			next.Filter(predicate),
+			predicate,
+		),
+	)
+}
+
+func (iter *Iterator[T]) Map(predicate func(T) any) interfaces.Option[*Mapper[T, any]] {
+	if iter == nil {
+		return interfaces.NewNoneOption[*Mapper[T, any]]()
+	}
+
+	if !iter.HasNext() {
+		return interfaces.NewOption(
+			NewMapperItem(
+				iter.current,
+				interfaces.NewNoneOption[*Mapper[T, any]](),
+				predicate,
+			),
+		)
+	}
+
+	next, _ := iter.Next().Unwrap()
+
+	return interfaces.NewOption(
+		NewMapperItem(
+			iter.current,
+			next.Map(predicate),
 			predicate,
 		),
 	)
@@ -72,6 +101,19 @@ func SliceUintIntoIter(values []uint) interfaces.Option[*Iterator[uint]] {
 		&Iterator[uint]{
 			current: values[0],
 			next:    SliceUintIntoIter(values[1:]),
+		},
+	)
+}
+
+func SliceIntoIter[T any](values []T) interfaces.Option[*Iterator[T]] {
+	if len(values) == 0 {
+		return interfaces.NewNoneOption[*Iterator[T]]()
+	}
+
+	return interfaces.NewOption(
+		&Iterator[T]{
+			current: values[0],
+			next:    SliceIntoIter(values[1:]),
 		},
 	)
 }

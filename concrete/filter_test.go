@@ -1,6 +1,7 @@
 package concrete
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -286,6 +287,118 @@ func TestFilterCollect(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			result := testCase.fields.Collect()
 			assert.Equal(t, testCase.want, result)
+		})
+	}
+}
+
+func TestFilteredMap(t *testing.T) {
+	toString := func(x uint) any { return fmt.Sprintf("%d", x) }
+	isUpperThan2 := func(x uint) bool { return x > 2 }
+	tests := []struct {
+		name   string
+		fields *Filtered[uint]
+		args   func(uint) any
+		want   interfaces.Option[*Mapper[uint, any]]
+	}{
+		{
+			name: "OK",
+			args: toString,
+			fields: &Filtered[uint]{
+				current:    10,
+				predicates: []func(x uint) bool{isUpperThan2},
+				validated:  true,
+				next: interfaces.Option[*Filtered[uint]]{
+					Status: interfaces.Some,
+					Value: &Filtered[uint]{
+						current:    1,
+						predicates: []func(x uint) bool{isUpperThan2},
+						validated:  false,
+						next: interfaces.Option[*Filtered[uint]]{
+							Status: interfaces.Some,
+							Value: &Filtered[uint]{
+								current:    2,
+								predicates: []func(x uint) bool{isUpperThan2},
+								validated:  true,
+								next: interfaces.Option[*Filtered[uint]]{
+									Status: interfaces.None,
+								},
+							},
+						},
+					},
+				},
+			},
+			want: interfaces.Option[*Mapper[uint, any]]{
+				Status: interfaces.Some,
+				Value: &Mapper[uint, any]{
+					current:   10,
+					transform: "10",
+					predicate: toString,
+					next: interfaces.Option[*Mapper[uint, any]]{
+						Status: interfaces.Some,
+						Value: &Mapper[uint, any]{
+							current:   8,
+							transform: "8",
+							predicate: toString,
+							next: interfaces.Option[*Mapper[uint, any]]{
+								Status: interfaces.None,
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "OK - without child",
+			args: toString,
+			fields: &Filtered[uint]{
+				current:    10,
+				predicates: []func(x uint) bool{isUpperThan2},
+				validated:  true,
+				next: interfaces.Option[*Filtered[uint]]{
+					Status: interfaces.None,
+				},
+			},
+			want: interfaces.Option[*Mapper[uint, any]]{
+				Status: interfaces.Some,
+				Value: &Mapper[uint, any]{
+					current:   10,
+					transform: "10",
+					predicate: toString,
+					next: interfaces.Option[*Mapper[uint, any]]{
+						Status: interfaces.None,
+					},
+				},
+			},
+		},
+		{
+			name: "OK - without child invalid value",
+			args: toString,
+			fields: &Filtered[uint]{
+				current:    1,
+				predicates: []func(x uint) bool{isUpperThan2},
+				validated:  false,
+				next: interfaces.Option[*Filtered[uint]]{
+					Status: interfaces.None,
+				},
+			},
+			want: interfaces.Option[*Mapper[uint, any]]{
+				Status: interfaces.None,
+			},
+		},
+		{
+			name: "nil filtered",
+			args: toString,
+			want: interfaces.Option[*Mapper[uint, any]]{
+				Status: interfaces.None,
+			},
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			result, _ := testCase.fields.Map(testCase.args).Unwrap()
+			expected, _ := testCase.want.Unwrap()
+			assert.True(t, expected.equal(result))
 		})
 	}
 }

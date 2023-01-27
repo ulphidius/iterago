@@ -1,6 +1,7 @@
 package concrete
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -273,6 +274,103 @@ func TestIteractorCollect(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			result := testCase.fields.Collect()
 			assert.Equal(t, testCase.want, result)
+		})
+	}
+}
+
+func TestIteractorMap(t *testing.T) {
+	toString := func(x uint) any { return fmt.Sprintf("%d", x) }
+
+	tests := []struct {
+		name   string
+		fields *Iterator[uint]
+		args   func(x uint) any
+		want   interfaces.Option[*Mapper[uint, any]]
+	}{
+		{
+			name: "OK",
+			fields: &Iterator[uint]{
+				current: 0,
+				next: interfaces.Option[*Iterator[uint]]{
+					Status: interfaces.Some,
+					Value: &Iterator[uint]{
+						current: 10,
+						next: interfaces.Option[*Iterator[uint]]{
+							Status: interfaces.Some,
+							Value: &Iterator[uint]{
+								current: 5,
+								next: interfaces.Option[*Iterator[uint]]{
+									Status: interfaces.None,
+								},
+							},
+						},
+					},
+				},
+			},
+			args: toString,
+			want: interfaces.NewOption(
+				&Mapper[uint, any]{
+					current:   0,
+					transform: "0",
+					predicate: toString,
+					next: interfaces.NewOption(
+						&Mapper[uint, any]{
+							current:   10,
+							transform: "10",
+							predicate: toString,
+							next: interfaces.NewOption(
+								&Mapper[uint, any]{
+									current:   5,
+									transform: "5",
+									predicate: toString,
+									next:      interfaces.NewNoneOption[*Mapper[uint, any]](),
+								},
+							),
+						},
+					),
+				},
+			),
+		},
+		{
+			name: "OK - Single value",
+			fields: &Iterator[uint]{
+				current: 0,
+				next:    interfaces.NewNoneOption[*Iterator[uint]](),
+			},
+			args: toString,
+			want: interfaces.NewOption(
+				&Mapper[uint, any]{
+					current:   0,
+					transform: "0",
+					predicate: toString,
+					next:      interfaces.NewNoneOption[*Mapper[uint, any]](),
+				},
+			),
+		},
+		{
+			name:   "nil value",
+			fields: nil,
+			want:   interfaces.NewNoneOption[*Mapper[uint, any]](),
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			result := testCase.fields.Map(testCase.args)
+
+			if testCase.want.IsNone() {
+				assert.Equal(t, testCase.want, result)
+				return
+			}
+
+			expected, _ := testCase.want.Unwrap()
+
+			for result.IsSome() {
+				result2, _ := result.Unwrap()
+				assert.True(t, result2.equal(expected))
+				result = result2.Next()
+				expected, _ = expected.Next().Unwrap()
+			}
 		})
 	}
 }
