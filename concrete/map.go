@@ -122,6 +122,19 @@ func (iter *Mapper[T, G]) Collect() []G {
 	return []G{iter.transform}
 }
 
+func (iter *Mapper[T, G]) Reduce(accumulator G, predicate func(x G, y G) G) G {
+	if iter == nil {
+		return accumulator
+	}
+
+	if iter.HasNext() {
+		next, _ := iter.Next().Unwrap()
+		return next.Reduce(predicate(accumulator, iter.transform), predicate)
+	}
+
+	return predicate(accumulator, iter.transform)
+}
+
 func (iter *Mapper[T, G]) equal(value *Mapper[T, G]) bool {
 	if iter == nil && value == nil {
 		return true

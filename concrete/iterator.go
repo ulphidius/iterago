@@ -92,17 +92,17 @@ func (iter *Iterator[T]) Collect() []T {
 	return []T{iter.current}
 }
 
-func SliceUintIntoIter(values []uint) interfaces.Option[*Iterator[uint]] {
-	if len(values) == 0 {
-		return interfaces.NewNoneOption[*Iterator[uint]]()
+func (iter *Iterator[T]) Reduce(accumulator T, predicate func(x T, y T) T) T {
+	if iter == nil {
+		return accumulator
 	}
 
-	return interfaces.NewOption(
-		&Iterator[uint]{
-			current: values[0],
-			next:    SliceUintIntoIter(values[1:]),
-		},
-	)
+	if iter.HasNext() {
+		next, _ := iter.Next().Unwrap()
+		return next.Reduce(predicate(accumulator, iter.current), predicate)
+	}
+
+	return predicate(accumulator, iter.current)
 }
 
 func SliceIntoIter[T any](values []T) interfaces.Option[*Iterator[T]] {

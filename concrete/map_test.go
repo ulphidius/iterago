@@ -482,3 +482,82 @@ func TestMapperCollect(t *testing.T) {
 		})
 	}
 }
+
+func TestMapperReduce(t *testing.T) {
+	toString := func(x uint) string { return fmt.Sprintf("%d", x) }
+	concat := func(x string, y string) string {
+		if len(x) == 0 {
+			return y
+		}
+
+		return fmt.Sprintf("%s,%s", x, y)
+	}
+
+	type args struct {
+		accumulator string
+		predicate   func(x, y string) string
+	}
+	tests := []struct {
+		name   string
+		args   args
+		fields *Mapper[uint, string]
+		want   string
+	}{
+		{
+			name: "OK",
+			args: args{
+				accumulator: "",
+				predicate:   concat,
+			},
+			fields: &Mapper[uint, string]{
+				current:   10,
+				transform: "10",
+				predicate: toString,
+				next: interfaces.Option[*Mapper[uint, string]]{
+					Status: interfaces.Some,
+					Value: &Mapper[uint, string]{
+						current:   20,
+						transform: "20",
+						predicate: toString,
+						next: interfaces.Option[*Mapper[uint, string]]{
+							Status: interfaces.None,
+						},
+					},
+				},
+			},
+			want: "10,20",
+		},
+		{
+			name: "OK - single value",
+			args: args{
+				accumulator: "",
+				predicate:   concat,
+			},
+			fields: &Mapper[uint, string]{
+				current:   10,
+				transform: "10",
+				predicate: toString,
+				next: interfaces.Option[*Mapper[uint, string]]{
+					Status: interfaces.None,
+				},
+			},
+			want: "10",
+		},
+		{
+			name: "nil mapper",
+			args: args{
+				accumulator: "100",
+				predicate:   concat,
+			},
+			fields: nil,
+			want:   "100",
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			result := testCase.fields.Reduce(testCase.args.accumulator, testCase.args.predicate)
+			assert.Equal(t, testCase.want, result)
+		})
+	}
+}
