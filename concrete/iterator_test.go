@@ -375,7 +375,7 @@ func TestIteractorMap(t *testing.T) {
 	}
 }
 
-func TestSliceUintIntoIter(t *testing.T) {
+func TestSliceIntoIter(t *testing.T) {
 	tests := []struct {
 		name         string
 		args         []uint
@@ -435,7 +435,7 @@ func TestSliceUintIntoIter(t *testing.T) {
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			result, err := SliceUintIntoIter(testCase.args).Unwrap()
+			result, err := SliceIntoIter(testCase.args).Unwrap()
 
 			if testCase.wantErr {
 				assert.NotNil(t, err)
@@ -444,6 +444,83 @@ func TestSliceUintIntoIter(t *testing.T) {
 			}
 
 			assert.Nil(t, err)
+			assert.Equal(t, testCase.want, result)
+		})
+	}
+}
+
+func TestIteratorReduce(t *testing.T) {
+	addFunction := func(u1, u2 uint) uint { return u1 + u2 }
+	type args struct {
+		accumulator uint
+		predicate   func(uint, uint) uint
+	}
+	tests := []struct {
+		name   string
+		fields *Iterator[uint]
+		args   args
+		want   uint
+	}{
+		{
+			name: "OK",
+			fields: &Iterator[uint]{
+				current: 0,
+				next: interfaces.Option[*Iterator[uint]]{
+					Status: interfaces.Some,
+					Value: &Iterator[uint]{
+						current: 2,
+						next: interfaces.Option[*Iterator[uint]]{
+							Status: interfaces.Some,
+							Value: &Iterator[uint]{
+								current: 1,
+								next: interfaces.Option[*Iterator[uint]]{
+									Status: interfaces.Some,
+									Value: &Iterator[uint]{
+										current: 5,
+										next: interfaces.Option[*Iterator[uint]]{
+											Status: interfaces.Some,
+											Value: &Iterator[uint]{
+												current: 10,
+												next: interfaces.Option[*Iterator[uint]]{
+													Status: interfaces.None,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			args: args{
+				accumulator: 0,
+				predicate:   addFunction,
+			},
+			want: 18,
+		},
+		{
+			name: "OK - single value",
+			fields: &Iterator[uint]{
+				current: 0,
+				next: interfaces.Option[*Iterator[uint]]{
+					Status: interfaces.None,
+				},
+			},
+			args: args{
+				accumulator: 5,
+				predicate:   addFunction,
+			},
+			want: 5,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			result := testCase.fields.Reduce(
+				testCase.args.accumulator,
+				testCase.args.predicate,
+			)
 			assert.Equal(t, testCase.want, result)
 		})
 	}

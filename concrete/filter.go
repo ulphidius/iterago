@@ -102,6 +102,22 @@ func (iter *Filtered[T]) Collect() []T {
 	return nil
 }
 
+func (iter *Filtered[T]) Reduce(accumulator T, predicate func(x T, y T) T) T {
+	if iter == nil {
+		return accumulator
+	}
+
+	if iter.HasNext() {
+		next, _ := iter.Next().Unwrap()
+		if iter.validated {
+			return next.Reduce(predicate(accumulator, iter.current), predicate)
+		}
+		return next.Reduce(accumulator, predicate)
+	}
+
+	return predicate(accumulator, iter.current)
+}
+
 func (iter *Filtered[T]) equal(value *Filtered[T]) bool {
 	if iter == nil && value == nil {
 		return true

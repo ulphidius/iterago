@@ -402,3 +402,83 @@ func TestFilteredMap(t *testing.T) {
 		})
 	}
 }
+
+func TestFilteredReduce(t *testing.T) {
+	addFunction := func(x uint, y uint) uint { return x + y }
+	isUpperThan2 := func(x uint) bool { return x > 2 }
+
+	type args struct {
+		accumulator uint
+		predicate   func(x uint, y uint) uint
+	}
+	tests := []struct {
+		name   string
+		fields *Filtered[uint]
+		args   args
+		want   uint
+	}{
+		{
+			name: "OK",
+			args: args{
+				accumulator: 0,
+				predicate:   addFunction,
+			},
+			fields: &Filtered[uint]{
+				current:    10,
+				predicates: []func(x uint) bool{isUpperThan2},
+				validated:  true,
+				next: interfaces.Option[*Filtered[uint]]{
+					Status: interfaces.Some,
+					Value: &Filtered[uint]{
+						current:    1,
+						predicates: []func(x uint) bool{isUpperThan2},
+						validated:  false,
+						next: interfaces.Option[*Filtered[uint]]{
+							Status: interfaces.Some,
+							Value: &Filtered[uint]{
+								current:    2,
+								predicates: []func(x uint) bool{isUpperThan2},
+								validated:  true,
+								next: interfaces.Option[*Filtered[uint]]{
+									Status: interfaces.None,
+								},
+							},
+						},
+					},
+				},
+			},
+			want: 12,
+		},
+		{
+			name: "OK - single value",
+			args: args{
+				accumulator: 5,
+				predicate:   addFunction,
+			},
+			fields: &Filtered[uint]{
+				current:    10,
+				predicates: []func(x uint) bool{isUpperThan2},
+				validated:  true,
+				next: interfaces.Option[*Filtered[uint]]{
+					Status: interfaces.None,
+				},
+			},
+			want: 15,
+		},
+		{
+			name: "nil filtered",
+			args: args{
+				accumulator: 5,
+				predicate:   addFunction,
+			},
+			want: 5,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			result := testCase.fields.Reduce(testCase.args.accumulator, testCase.args.predicate)
+			assert.Equal(t, testCase.want, result)
+		})
+	}
+}
