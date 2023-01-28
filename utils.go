@@ -1,4 +1,4 @@
-package interfaces
+package iterago
 
 import "errors"
 
@@ -8,11 +8,6 @@ const (
 	None Optional = iota
 	Some
 )
-
-type Iterator[T any] interface {
-	Next() Option[T]
-	HasNext() bool
-}
 
 type Option[T any] struct {
 	Status Optional
@@ -46,4 +41,8 @@ func (opt Option[T]) Unwrap() (T, error) {
 	}
 
 	return opt.Value, nil
+}
+
+func compare(a interface{}, b interface{}) bool {
+	return a == b
 }

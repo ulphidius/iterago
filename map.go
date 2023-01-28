@@ -1,21 +1,19 @@
-package concrete
+package iterago
 
 import (
 	"fmt"
-
-	"github.com/ulphidius/iterago/interfaces"
 )
 
 type Mapper[T any, G any] struct {
 	current   T
-	next      interfaces.Option[*Mapper[T, G]]
+	next      Option[*Mapper[T, G]]
 	predicate func(T) G
 	transform G
 }
 
 func NewMapperItem[T any, G any](
 	value T,
-	next interfaces.Option[*Mapper[T, G]],
+	next Option[*Mapper[T, G]],
 	predicate func(T) G,
 ) *Mapper[T, G] {
 	return &Mapper[T, G]{
@@ -26,25 +24,25 @@ func NewMapperItem[T any, G any](
 	}
 }
 
-func (iter *Mapper[T, G]) Next() interfaces.Option[*Mapper[T, G]] {
+func (iter *Mapper[T, G]) Next() Option[*Mapper[T, G]] {
 	if iter == nil || !iter.HasNext() {
-		return interfaces.NewNoneOption[*Mapper[T, G]]()
+		return NewNoneOption[*Mapper[T, G]]()
 	}
 
 	next, _ := iter.next.Unwrap()
 	next.transform = iter.predicate(next.current)
 
-	return interfaces.NewOption(next)
+	return NewOption(next)
 }
 
-func (iter *Mapper[T, G]) compute() interfaces.Option[*Mapper[T, G]] {
+func (iter *Mapper[T, G]) compute() Option[*Mapper[T, G]] {
 	if iter == nil {
-		return interfaces.NewNoneOption[*Mapper[T, G]]()
+		return NewNoneOption[*Mapper[T, G]]()
 	}
 
 	iter.transform = iter.predicate(iter.current)
 
-	return interfaces.NewOption(iter)
+	return NewOption(iter)
 }
 
 func (iter *Mapper[T, G]) HasNext() bool {
@@ -55,57 +53,65 @@ func (iter *Mapper[T, G]) HasNext() bool {
 	return iter.next.IsSome()
 }
 
-func (iter *Mapper[T, G]) Filter(predicate func(G) bool) interfaces.Option[*Filtered[G]] {
+func (iter *Mapper[T, G]) Filter(predicate func(G) bool) *Filter[G] {
 	if iter == nil {
-		return interfaces.NewNoneOption[*Filtered[G]]()
+		return nil
 	}
 
 	if !iter.HasNext() {
-		return interfaces.NewOption(
-			NewFilteredItem(
-				iter.transform,
-				interfaces.NewNoneOption[*Filtered[G]](),
-				predicate,
-			),
+		return NewFilterItem(
+			iter.transform,
+			NewNoneOption[*Filter[G]](),
+			predicate,
 		)
 	}
 
 	next, _ := iter.Next().Unwrap()
+	filtered := next.Filter(predicate)
+	wrapped := func() Option[*Filter[G]] {
+		if filtered == nil {
+			return NewNoneOption[*Filter[G]]()
+		}
 
-	return interfaces.NewOption(
-		NewFilteredItem(
-			iter.transform,
-			next.Filter(predicate),
-			predicate,
-		),
+		return NewOption(filtered)
+	}()
+
+	return NewFilterItem(
+		iter.transform,
+		wrapped,
+		predicate,
 	)
 }
 
-func (iter *Mapper[T, G]) Map(predicate func(G) any) interfaces.Option[*Mapper[G, any]] {
+func (iter *Mapper[T, G]) Map(predicate func(G) any) *Mapper[G, any] {
 	if iter == nil {
-		return interfaces.NewNoneOption[*Mapper[G, any]]()
+		return nil
 	}
 
 	current, _ := iter.compute().Unwrap()
 
 	if !current.HasNext() {
-		return interfaces.NewOption(
-			NewMapperItem(
-				current.transform,
-				interfaces.NewNoneOption[*Mapper[G, any]](),
-				predicate,
-			),
+		return NewMapperItem(
+			current.transform,
+			NewNoneOption[*Mapper[G, any]](),
+			predicate,
 		)
 	}
 
 	next, _ := current.Next().Unwrap()
+	filtered := next.Map(predicate)
+	wrapped := func() Option[*Mapper[G, any]] {
+		if filtered == nil {
+			return NewNoneOption[*Mapper[G, any]]()
+		}
 
-	return interfaces.NewOption(
-		NewMapperItem(
-			current.transform,
-			next.Map(predicate),
-			predicate,
-		),
+		return NewOption(filtered)
+	}()
+
+	return NewMapperItem(
+		current.transform,
+		wrapped,
+		predicate,
 	)
 }
 
