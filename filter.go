@@ -1,5 +1,9 @@
 package iterago
 
+// Concrete implementation of a basic Iterator.
+//
+// It takes a value of a any Type and has a Option of a another Iter.
+// It takes a predication function which validate the value.
 type Filter[T any] struct {
 	current   T
 	next      Option[*Filter[T]]
@@ -20,6 +24,9 @@ func NewFilterItem[T any](
 	}
 }
 
+// Explores Iterator by returning the next value.
+//
+// It validates the next value with the predicate function.
 func (iter *Filter[T]) Next() Option[*Filter[T]] {
 	if iter == nil || !iter.HasNext() {
 		return NewNoneOption[*Filter[T]]()
@@ -34,6 +41,7 @@ func (iter *Filter[T]) Next() Option[*Filter[T]] {
 	return NewOption(next)
 }
 
+// Checks if the next value is setted.
 func (iter *Filter[T]) HasNext() bool {
 	if iter == nil {
 		return false
@@ -42,6 +50,9 @@ func (iter *Filter[T]) HasNext() bool {
 	return iter.next.IsSome()
 }
 
+// Creates an Iterator which validate the values.
+//
+// This function use a lambda function to validate the Iterator value.
 func (iter *Filter[T]) Filter(predicate func(T) bool) *Filter[T] {
 	if iter == nil {
 		return nil
@@ -80,6 +91,10 @@ func (iter *Filter[T]) Filter(predicate func(T) bool) *Filter[T] {
 	return nil
 }
 
+// Creates an Iterator which transform the values.
+//
+// This function use a lambda function to transform the Iterator value into another one.
+// Only the validated values are converted into Mapper.
 func (iter *Filter[T]) Map(predicate func(T) any) *Mapper[T, any] {
 	if iter == nil {
 		return nil
@@ -118,6 +133,7 @@ func (iter *Filter[T]) Map(predicate func(T) any) *Mapper[T, any] {
 	return next.Map(predicate)
 }
 
+// Consumes an Iterator into a Slice of values.
 func (iter *Filter[T]) Collect() []T {
 	if iter == nil {
 		return nil
@@ -138,6 +154,7 @@ func (iter *Filter[T]) Collect() []T {
 	return nil
 }
 
+// Consumes an Iterator into a value.
 func (iter *Filter[T]) Reduce(accumulator T, predicate func(x T, y T) T) T {
 	if iter == nil {
 		return accumulator
