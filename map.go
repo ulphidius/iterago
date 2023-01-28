@@ -4,6 +4,10 @@ import (
 	"fmt"
 )
 
+// Concrete implementation of a basic Iterator.
+//
+// It takes a value of a any Type and has a Option of a another Iter.
+// It takes a predication function which transforms the value into another one.
 type Mapper[T any, G any] struct {
 	current   T
 	next      Option[*Mapper[T, G]]
@@ -24,6 +28,9 @@ func NewMapperItem[T any, G any](
 	}
 }
 
+// Explores Iterator by returning the next value.
+//
+// It transforms the next value with the predicate function.
 func (iter *Mapper[T, G]) Next() Option[*Mapper[T, G]] {
 	if iter == nil || !iter.HasNext() {
 		return NewNoneOption[*Mapper[T, G]]()
@@ -45,6 +52,7 @@ func (iter *Mapper[T, G]) compute() Option[*Mapper[T, G]] {
 	return NewOption(iter)
 }
 
+// Checks if the next value is setted.
 func (iter *Mapper[T, G]) HasNext() bool {
 	if iter == nil {
 		return false
@@ -53,6 +61,10 @@ func (iter *Mapper[T, G]) HasNext() bool {
 	return iter.next.IsSome()
 }
 
+// Creates an Iterator which validate the values.
+//
+// This function use a lambda function to validate the Iterator value.
+// Only the transformed values are converted into Filter.
 func (iter *Mapper[T, G]) Filter(predicate func(G) bool) *Filter[G] {
 	if iter == nil {
 		return nil
@@ -83,6 +95,10 @@ func (iter *Mapper[T, G]) Filter(predicate func(G) bool) *Filter[G] {
 	)
 }
 
+// Creates an Iterator which transform the values.
+//
+// This function use a lambda function to transform the Iterator value into another one.
+// Only the transformed values are converted into Mapper.
 func (iter *Mapper[T, G]) Map(predicate func(G) any) *Mapper[G, any] {
 	if iter == nil {
 		return nil
@@ -115,6 +131,7 @@ func (iter *Mapper[T, G]) Map(predicate func(G) any) *Mapper[G, any] {
 	)
 }
 
+// Consumes an Iterator into a Slice of values.
 func (iter *Mapper[T, G]) Collect() []G {
 	if iter == nil {
 		return nil
@@ -128,6 +145,7 @@ func (iter *Mapper[T, G]) Collect() []G {
 	return []G{iter.transform}
 }
 
+// Consumes an Iterator into a value.
 func (iter *Mapper[T, G]) Reduce(accumulator G, predicate func(x G, y G) G) G {
 	if iter == nil {
 		return accumulator

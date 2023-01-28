@@ -2,13 +2,15 @@ package iterago
 
 import "errors"
 
+// Enumeration which defined the Option struct state.
 type Optional uint
 
 const (
-	None Optional = iota
-	Some
+	None Optional = iota // Represents the absence of value
+	Some                 // Represents the presence of value
 )
 
+// Representation of an Optional value,
 type Option[T any] struct {
 	Status Optional
 	Value  T
@@ -35,6 +37,7 @@ func (opt Option[T]) IsNone() bool {
 	return opt.Status == None
 }
 
+// Return the option value if option is some or return an error
 func (opt Option[T]) Unwrap() (T, error) {
 	if opt.Status == None {
 		return opt.Value, errors.New(ErrUnwrapNoneOption)
