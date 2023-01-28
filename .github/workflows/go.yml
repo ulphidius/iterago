@@ -50,3 +50,11 @@ jobs:
                   echo "Failed"
                   exit 1
               fi
+      - name: Coveralls
+        run: |
+              go get golang.org/x/tools/cmd/cover
+              go get github.com/mattn/goveralls
+              go test -v -covermode=count -coverprofile=coverage.out
+              $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=github -repotoken $COVERALLS_TOKEN
+      - name: Go report card
+        uses: creekorful/goreportcard-action@v1.0
