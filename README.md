@@ -1,7 +1,7 @@
 # Iterago
 
-[![Go](https://github.com/ulphidius/iterago/actions/workflows/go.yml/badge.svg)](https://github.com/ulphidius/iterago/actions/workflows/go.yml)
-[![Coverage](https://coveralls.io/repos/github/ulphidius/iterago/badge.svg?branch=master)](https://coveralls.io/github/ulphidius/iterago?branch=master)
+[![push_master](https://github.com/ulphidius/iterago/actions/workflows/push_master.yml/badge.svg)](https://github.com/ulphidius/iterago/actions/workflows/push_master.yml)
+[![codecov](https://codecov.io/gh/ulphidius/iterago/branch/master/graph/badge.svg?token=AG5HTRG4W4)](https://codecov.io/gh/ulphidius/iterago)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ulphidius/iterago)](https://goreportcard.com/report/github.com/ulphidius/iterago)
 [![Go Reference](https://pkg.go.dev/badge/github.com/ulphidius/iterago.svg)](https://pkg.go.dev/github.com/ulphidius/iterago)
 
