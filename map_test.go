@@ -1,4 +1,4 @@
-package concrete
+package iterago
 
 import (
 	"fmt"
@@ -6,14 +6,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/ulphidius/iterago/interfaces"
 )
 
 func TestNewMapperItem(t *testing.T) {
 	toString := func(x uint) string { return fmt.Sprintf("%d", x) }
 	type args struct {
 		value     uint
-		next      interfaces.Option[*Mapper[uint, string]]
+		next      Option[*Mapper[uint, string]]
 		predicate func(uint) string
 	}
 
@@ -26,11 +25,11 @@ func TestNewMapperItem(t *testing.T) {
 			name: "OK - with child",
 			args: args{
 				value: 10,
-				next: interfaces.NewOption(
+				next: NewOption(
 					&Mapper[uint, string]{
 						current:   150,
 						transform: "150",
-						next:      interfaces.NewNoneOption[*Mapper[uint, string]](),
+						next:      NewNoneOption[*Mapper[uint, string]](),
 						predicate: toString,
 					},
 				),
@@ -40,12 +39,12 @@ func TestNewMapperItem(t *testing.T) {
 				current:   10,
 				transform: "10",
 				predicate: toString,
-				next: interfaces.NewOption(
+				next: NewOption(
 					&Mapper[uint, string]{
 						current:   150,
 						transform: "150",
 						predicate: toString,
-						next:      interfaces.NewNoneOption[*Mapper[uint, string]](),
+						next:      NewNoneOption[*Mapper[uint, string]](),
 					},
 				),
 			},
@@ -54,14 +53,14 @@ func TestNewMapperItem(t *testing.T) {
 			name: "OK",
 			args: args{
 				value:     10,
-				next:      interfaces.NewNoneOption[*Mapper[uint, string]](),
+				next:      NewNoneOption[*Mapper[uint, string]](),
 				predicate: toString,
 			},
 			want: &Mapper[uint, string]{
 				current:   10,
 				transform: "10",
 				predicate: toString,
-				next:      interfaces.NewNoneOption[*Mapper[uint, string]](),
+				next:      NewNoneOption[*Mapper[uint, string]](),
 			},
 		},
 	}
@@ -83,7 +82,7 @@ func TestMapperCompute(t *testing.T) {
 	tests := []struct {
 		name   string
 		fields *Mapper[uint, string]
-		want   interfaces.Option[*Mapper[uint, string]]
+		want   Option[*Mapper[uint, string]]
 	}{
 		{
 			name: "OK",
@@ -92,7 +91,7 @@ func TestMapperCompute(t *testing.T) {
 				transform: "10",
 				predicate: toString,
 			},
-			want: interfaces.NewOption(
+			want: NewOption(
 				&Mapper[uint, string]{
 					current:   10,
 					transform: "10",
@@ -102,7 +101,7 @@ func TestMapperCompute(t *testing.T) {
 		},
 		{
 			name: "nil mapper",
-			want: interfaces.NewNoneOption[*Mapper[uint, string]](),
+			want: NewNoneOption[*Mapper[uint, string]](),
 		},
 	}
 
@@ -124,7 +123,7 @@ func TestMapperHasNext(t *testing.T) {
 		{
 			name: "OK",
 			fields: &Mapper[uint, string]{
-				next: interfaces.NewOption(
+				next: NewOption(
 					&Mapper[uint, string]{},
 				),
 			},
@@ -133,7 +132,7 @@ func TestMapperHasNext(t *testing.T) {
 		{
 			name: "none next",
 			fields: &Mapper[uint, string]{
-				next: interfaces.NewNoneOption[*Mapper[uint, string]](),
+				next: NewNoneOption[*Mapper[uint, string]](),
 			},
 			want: false,
 		},
@@ -155,7 +154,7 @@ func TestMapperNext(t *testing.T) {
 	tests := []struct {
 		name   string
 		fields *Mapper[uint, string]
-		want   interfaces.Option[*Mapper[uint, string]]
+		want   Option[*Mapper[uint, string]]
 	}{
 		{
 			name: "OK",
@@ -163,20 +162,20 @@ func TestMapperNext(t *testing.T) {
 				current:   10,
 				transform: "10",
 				predicate: toString,
-				next: interfaces.NewOption(
+				next: NewOption(
 					&Mapper[uint, string]{
 						current:   150,
 						predicate: toString,
-						next:      interfaces.NewNoneOption[*Mapper[uint, string]](),
+						next:      NewNoneOption[*Mapper[uint, string]](),
 					},
 				),
 			},
-			want: interfaces.NewOption(
+			want: NewOption(
 				&Mapper[uint, string]{
 					current:   150,
 					transform: "150",
 					predicate: toString,
-					next:      interfaces.NewNoneOption[*Mapper[uint, string]](),
+					next:      NewNoneOption[*Mapper[uint, string]](),
 				},
 			),
 		},
@@ -186,13 +185,13 @@ func TestMapperNext(t *testing.T) {
 				current:   150,
 				transform: "150",
 				predicate: toString,
-				next:      interfaces.NewNoneOption[*Mapper[uint, string]](),
+				next:      NewNoneOption[*Mapper[uint, string]](),
 			},
-			want: interfaces.NewNoneOption[*Mapper[uint, string]](),
+			want: NewNoneOption[*Mapper[uint, string]](),
 		},
 		{
 			name: "nil mapper",
-			want: interfaces.NewNoneOption[*Mapper[uint, string]](),
+			want: NewNoneOption[*Mapper[uint, string]](),
 		},
 	}
 
@@ -214,7 +213,7 @@ func TestMapperFilter(t *testing.T) {
 		name   string
 		fields *Mapper[uint, string]
 		args   func(string) bool
-		want   interfaces.Option[*Filtered[string]]
+		want   Option[*Filter[string]]
 	}{
 		{
 			name: "OK",
@@ -222,30 +221,30 @@ func TestMapperFilter(t *testing.T) {
 				current:   10,
 				transform: "10",
 				predicate: toString,
-				next: interfaces.NewOption(
+				next: NewOption(
 					&Mapper[uint, string]{
 						current:   150,
 						transform: "150",
 						predicate: toString,
-						next:      interfaces.NewNoneOption[*Mapper[uint, string]](),
+						next:      NewNoneOption[*Mapper[uint, string]](),
 					},
 				),
 			},
 			args: isNotNull,
-			want: interfaces.Option[*Filtered[string]]{
-				Status: interfaces.Some,
-				Value: &Filtered[string]{
-					current:    "10",
-					validated:  true,
-					predicates: []func(x string) bool{isNotNull},
-					next: interfaces.Option[*Filtered[string]]{
-						Status: interfaces.Some,
-						Value: &Filtered[string]{
-							current:    "150",
-							validated:  true,
-							predicates: []func(x string) bool{isNotNull},
-							next: interfaces.Option[*Filtered[string]]{
-								Status: interfaces.None,
+			want: Option[*Filter[string]]{
+				Status: Some,
+				Value: &Filter[string]{
+					current:   "10",
+					validated: true,
+					predicate: isNotNull,
+					next: Option[*Filter[string]]{
+						Status: Some,
+						Value: &Filter[string]{
+							current:   "150",
+							validated: true,
+							predicate: isNotNull,
+							next: Option[*Filter[string]]{
+								Status: None,
 							},
 						},
 					},
@@ -258,42 +257,42 @@ func TestMapperFilter(t *testing.T) {
 				current:   10,
 				transform: "10",
 				predicate: toString,
-				next: interfaces.NewOption(
+				next: NewOption(
 					&Mapper[uint, string]{
 						transform: "",
 						predicate: toString,
-						next: interfaces.NewOption(
+						next: NewOption(
 							&Mapper[uint, string]{
 								current:   150,
 								transform: "150",
 								predicate: toString,
-								next:      interfaces.NewNoneOption[*Mapper[uint, string]](),
+								next:      NewNoneOption[*Mapper[uint, string]](),
 							},
 						),
 					},
 				),
 			},
 			args: isNotNull,
-			want: interfaces.Option[*Filtered[string]]{
-				Status: interfaces.Some,
-				Value: &Filtered[string]{
-					current:    "10",
-					validated:  true,
-					predicates: []func(x string) bool{isNotNull},
-					next: interfaces.Option[*Filtered[string]]{
-						Status: interfaces.Some,
-						Value: &Filtered[string]{
-							current:    "",
-							validated:  false,
-							predicates: []func(x string) bool{isNotNull},
-							next: interfaces.Option[*Filtered[string]]{
-								Status: interfaces.Some,
-								Value: &Filtered[string]{
-									current:    "150",
-									validated:  true,
-									predicates: []func(x string) bool{isNotNull},
-									next: interfaces.Option[*Filtered[string]]{
-										Status: interfaces.None,
+			want: Option[*Filter[string]]{
+				Status: Some,
+				Value: &Filter[string]{
+					current:   "10",
+					validated: true,
+					predicate: isNotNull,
+					next: Option[*Filter[string]]{
+						Status: Some,
+						Value: &Filter[string]{
+							current:   "",
+							validated: false,
+							predicate: isNotNull,
+							next: Option[*Filter[string]]{
+								Status: Some,
+								Value: &Filter[string]{
+									current:   "150",
+									validated: true,
+									predicate: isNotNull,
+									next: Option[*Filter[string]]{
+										Status: None,
 									},
 								},
 							},
@@ -308,17 +307,17 @@ func TestMapperFilter(t *testing.T) {
 				current:   10,
 				transform: "10",
 				predicate: toString,
-				next:      interfaces.NewNoneOption[*Mapper[uint, string]](),
+				next:      NewNoneOption[*Mapper[uint, string]](),
 			},
 			args: isNotNull,
-			want: interfaces.Option[*Filtered[string]]{
-				Status: interfaces.Some,
-				Value: &Filtered[string]{
-					current:    "10",
-					validated:  true,
-					predicates: []func(x string) bool{isNotNull},
-					next: interfaces.Option[*Filtered[string]]{
-						Status: interfaces.None,
+			want: Option[*Filter[string]]{
+				Status: Some,
+				Value: &Filter[string]{
+					current:   "10",
+					validated: true,
+					predicate: isNotNull,
+					next: Option[*Filter[string]]{
+						Status: None,
 					},
 				},
 			},
@@ -326,13 +325,13 @@ func TestMapperFilter(t *testing.T) {
 		{
 			name: "nil mapper",
 			args: isNotNull,
-			want: interfaces.NewNoneOption[*Filtered[string]](),
+			want: NewNoneOption[*Filter[string]](),
 		},
 	}
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			result, _ := testCase.fields.Filter(testCase.args).Unwrap()
+			result := testCase.fields.Filter(testCase.args)
 			expected, _ := testCase.want.Unwrap()
 			assert.True(t, expected.equal(result))
 		})
@@ -360,14 +359,14 @@ func TestMapperMap(t *testing.T) {
 				current:   10,
 				transform: "10",
 				predicate: toString,
-				next: interfaces.Option[*Mapper[uint, string]]{
-					Status: interfaces.Some,
+				next: Option[*Mapper[uint, string]]{
+					Status: Some,
 					Value: &Mapper[uint, string]{
 						current:   20,
 						transform: "20",
 						predicate: toString,
-						next: interfaces.Option[*Mapper[uint, string]]{
-							Status: interfaces.None,
+						next: Option[*Mapper[uint, string]]{
+							Status: None,
 						},
 					},
 				},
@@ -377,14 +376,14 @@ func TestMapperMap(t *testing.T) {
 				current:   "10",
 				transform: uint(10),
 				predicate: toUint,
-				next: interfaces.Option[*Mapper[string, any]]{
-					Status: interfaces.Some,
+				next: Option[*Mapper[string, any]]{
+					Status: Some,
 					Value: &Mapper[string, any]{
 						current:   "20",
 						transform: uint(20),
 						predicate: toUint,
-						next: interfaces.Option[*Mapper[string, any]]{
-							Status: interfaces.None,
+						next: Option[*Mapper[string, any]]{
+							Status: None,
 						},
 					},
 				},
@@ -396,8 +395,8 @@ func TestMapperMap(t *testing.T) {
 				current:   10,
 				transform: "10",
 				predicate: toString,
-				next: interfaces.Option[*Mapper[uint, string]]{
-					Status: interfaces.None,
+				next: Option[*Mapper[uint, string]]{
+					Status: None,
 				},
 			},
 			args: toUint,
@@ -405,8 +404,8 @@ func TestMapperMap(t *testing.T) {
 				current:   "10",
 				transform: uint(10),
 				predicate: toUint,
-				next: interfaces.Option[*Mapper[string, any]]{
-					Status: interfaces.None,
+				next: Option[*Mapper[string, any]]{
+					Status: None,
 				},
 			},
 		},
@@ -419,7 +418,7 @@ func TestMapperMap(t *testing.T) {
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			result, _ := testCase.fields.Map(testCase.args).Unwrap()
+			result := testCase.fields.Map(testCase.args)
 			assert.True(t, testCase.want.equal(result))
 		})
 	}
@@ -438,14 +437,14 @@ func TestMapperCollect(t *testing.T) {
 				current:   10,
 				transform: "10",
 				predicate: toString,
-				next: interfaces.Option[*Mapper[uint, string]]{
-					Status: interfaces.Some,
+				next: Option[*Mapper[uint, string]]{
+					Status: Some,
 					Value: &Mapper[uint, string]{
 						current:   20,
 						transform: "20",
 						predicate: toString,
-						next: interfaces.Option[*Mapper[uint, string]]{
-							Status: interfaces.None,
+						next: Option[*Mapper[uint, string]]{
+							Status: None,
 						},
 					},
 				},
@@ -461,8 +460,8 @@ func TestMapperCollect(t *testing.T) {
 				current:   10,
 				transform: "10",
 				predicate: toString,
-				next: interfaces.Option[*Mapper[uint, string]]{
-					Status: interfaces.None,
+				next: Option[*Mapper[uint, string]]{
+					Status: None,
 				},
 			},
 			want: []string{
@@ -513,14 +512,14 @@ func TestMapperReduce(t *testing.T) {
 				current:   10,
 				transform: "10",
 				predicate: toString,
-				next: interfaces.Option[*Mapper[uint, string]]{
-					Status: interfaces.Some,
+				next: Option[*Mapper[uint, string]]{
+					Status: Some,
 					Value: &Mapper[uint, string]{
 						current:   20,
 						transform: "20",
 						predicate: toString,
-						next: interfaces.Option[*Mapper[uint, string]]{
-							Status: interfaces.None,
+						next: Option[*Mapper[uint, string]]{
+							Status: None,
 						},
 					},
 				},
@@ -537,8 +536,8 @@ func TestMapperReduce(t *testing.T) {
 				current:   10,
 				transform: "10",
 				predicate: toString,
-				next: interfaces.Option[*Mapper[uint, string]]{
-					Status: interfaces.None,
+				next: Option[*Mapper[uint, string]]{
+					Status: None,
 				},
 			},
 			want: "10",
