@@ -22,6 +22,8 @@ jobs:
   badges:
     runs-on: ubuntu-latest
     steps:
+      env:
+        COVERALL_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
       - uses: actions/checkout@v3
 
       - name: Set up Go
@@ -35,6 +37,7 @@ jobs:
               go get github.com/mattn/goveralls
               go install github.com/mattn/goveralls
               go test -v -covermode=count -coverprofile=coverage.out
-              goveralls -coverprofile=coverage.out -service=github -repotoken ${{ secrets.COVERALLS_TOKEN }}
+              goveralls -coverprofile=coverage.out -service=github -repotoken "$COVERALL_TOKEN"
+      
       - name: Go Report Card
         uses: creekorful/goreportcard-action@v1.0
