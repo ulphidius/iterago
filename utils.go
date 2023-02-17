@@ -1,7 +1,5 @@
 package iterago
 
-import "errors"
-
 // Enumeration which defined the Option struct state.
 type Optional uint
 
@@ -38,14 +36,10 @@ func (opt Option[T]) IsNone() bool {
 }
 
 // Return the option value if option is some or return an error
-func (opt Option[T]) Unwrap() (T, error) {
+func (opt Option[T]) Unwrap() T {
 	if opt.Status == None {
-		return opt.Value, errors.New(ErrUnwrapNoneOption)
+		panic(ErrUnwrapNoneOption)
 	}
 
-	return opt.Value, nil
-}
-
-func compare(a interface{}, b interface{}) bool {
-	return a == b
+	return opt.Value
 }

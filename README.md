@@ -19,13 +19,8 @@ go get github.com/ulphidius/iterago
 
 ```go
 slice := []uint{1, 2, 4, 8, 16, 32, 64, 128, 256, 512}
-// Converts the slice into an option of iterator
-potentialIter := iterago.SliceIntoIter(slice)
-// Get the iterator and ignores the potential error
-iterator, _ := potentialIter.Unwrap()
 // Filters all values upper than 128 and get back a slice of uint
-result := iterator.Filter(func(x uint) bool { return x <= 128 }).
-    Collect()
+result := iterago.Filter(slice, func(x uint) bool { return x <= 128 })
 // Should display [1 2 4 8 16 32 64 128]
 fmt.Println(result)
 ```
@@ -34,13 +29,8 @@ fmt.Println(result)
 
 ```go
 slice := []uint{1, 2, 4, 8, 16, 32, 64, 128, 256, 512}
-// Converts the slice into an option of iterator
-potentialIter := iterago.SliceIntoIter(slice)
-// Get the iterator and ignores the potential error
-iterator, _ := potentialIter.Unwrap()
 // Transforms all unsigned int values into a string 
-result := iterator.Map(func(x uint) any { return fmt.Sprintf("%d", x) }).
-    Collect()
+result := iterago.Map(slice, func(x uint) string { return fmt.Sprintf("%d", x) })
 // Should display [1 2 4 8 16 32 64 128 256 512]
 fmt.Println(result)
 ```
@@ -49,31 +39,15 @@ fmt.Println(result)
 
 ```go
 slice := []uint{1, 2, 4, 8, 16, 32, 64, 128, 256, 512}
-// Converts the slice into an option of iterator
-potentialIter := iterago.SliceIntoIter(slice)
-// Get the iterator and ignores the potential error
-iterator, _ := potentialIter.Unwrap()
 // Add up all the unsigned int values 
-result := iterator.Reduce(func(x, y uint) uint { return x + y })
+result := iterago.Reduce(slice, 0, func(x, y uint) uint { return x + y })
 // Should display 1023
 fmt.Println(result)
 ```
 
 ### Chained function
 
-```go
-slice := []uint{1, 2, 4, 8, 16, 32, 64, 128, 256, 512}
-// Converts the slice into an option of iterator
-potentialIter := iterago.SliceIntoIter(slice)
-// Get the iterator and ignores the potential error
-iterator, _ := potentialIter.Unwrap()
-// Filters all values lower or equal than 16 and upper than 128 and add up all the values
-result := iterator.Filter(func(x uint) bool { return x <= 128 }).
-    Filter(func(x uint) bool { return x >= 16 }).
-    Reduce(func(x, y uint) uint { return x + y })
-// Should display 240
-fmt.Println(result)
-```
+TODO
 
 ## Licence
 
