@@ -141,15 +141,13 @@ func TestOptionUnwrap(t *testing.T) {
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			result, err := testCase.fields.Unwrap()
-
 			if testCase.wantErr {
-				assert.NotNil(t, err)
-				assert.Equal(t, testCase.errorMessage, err.Error())
+				assert.PanicsWithValue(t, testCase.errorMessage, func() { testCase.fields.Unwrap() })
 				return
 			}
 
-			assert.Nil(t, err)
+			result := testCase.fields.Unwrap()
+
 			assert.Equal(t, testCase.want, result)
 		})
 	}
