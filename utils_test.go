@@ -152,3 +152,34 @@ func TestOptionUnwrap(t *testing.T) {
 		})
 	}
 }
+
+func TestNewPair(t *testing.T) {
+	type args struct {
+		first  uint
+		second uint
+	}
+	tests := []struct {
+		name string
+		args args
+		want Pair[uint]
+	}{
+		{
+			name: "OK",
+			args: args{
+				first:  1,
+				second: 2,
+			},
+			want: Pair[uint]{
+				First:  1,
+				Second: 2,
+			},
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			result := NewPair(testCase.args.first, testCase.args.second)
+			assert.Equal(t, testCase.want, result)
+		})
+	}
+}

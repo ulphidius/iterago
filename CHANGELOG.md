@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2023-02-18
+
+### Added
+
+- Partition function
+- Zip function
+- Examples for each functions
+
 ## [0.2.0] - 2023-02-17
 
 ### Added
@@ -40,6 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI
 - Generic Slice into Iterator function
 
-[unreleased]: https://github.com/ulphidius/iterago/compare/v0.2.0...master
+[unreleased]: https://github.com/ulphidius/iterago/compare/v0.3.0...master
+[0.3.0]:  https://github.com/ulphidius/iterago/compare/v0.2.0...v0.3.0
 [0.2.0]:  https://github.com/ulphidius/iterago/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/ulphidius/iterago/releases/tag/v0.1.0
