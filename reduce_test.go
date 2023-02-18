@@ -1,6 +1,7 @@
 package iterago
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -53,4 +54,11 @@ func TestReduce(t *testing.T) {
 			assert.Equal(t, testCase.want, result)
 		})
 	}
+}
+
+func ExampleReduce() {
+	values := []uint8{1, 2, 3, 4, 5, 6, 7, 8, 9}
+
+	fmt.Println(Reduce(values, 0, func(acc, value uint8) uint8 { return acc + value }))
+	// Output: 45
 }
