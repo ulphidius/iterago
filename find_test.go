@@ -1,6 +1,7 @@
 package iterago
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -48,4 +49,35 @@ func TestFind(t *testing.T) {
 			assert.Equal(t, testCase.want, result)
 		})
 	}
+}
+
+func ExampleFind() {
+	type user struct {
+		Name string
+		Age  uint8
+	}
+
+	users := []user{
+		{
+			Name: "Max",
+			Age:  15,
+		},
+		{
+			Name: "Michel",
+			Age:  25,
+		},
+		{
+			Name: "Julie",
+			Age:  19,
+		},
+		{
+			Name: "Sam",
+			Age:  35,
+		},
+	}
+
+	result := Find(users, func(u user) bool { return u.Age > 20 })
+
+	fmt.Println(result.IsSome(), result.Unwrap())
+	// Output: true {Michel 25}
 }

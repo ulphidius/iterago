@@ -54,3 +54,14 @@ func TestFold(t *testing.T) {
 		})
 	}
 }
+
+func ExampleFold() {
+	type sample struct {
+		v uint8
+	}
+
+	values := []uint8{1, 2, 3, 4, 5, 6, 7, 8, 9}
+
+	fmt.Println(Fold(values, sample{v: 0}, func(acc sample, value uint8) sample { return sample{v: acc.v + value} }))
+	// Output: {45}
+}
