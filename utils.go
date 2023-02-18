@@ -35,11 +35,24 @@ func (opt Option[T]) IsNone() bool {
 	return opt.Status == None
 }
 
-// Return the option value if option is some or return an error
+// Return the option value if option is Some or panic if None
 func (opt Option[T]) Unwrap() T {
 	if opt.Status == None {
 		panic(ErrUnwrapNoneOption)
 	}
 
 	return opt.Value
+}
+
+// Representation of 2 values of the same type
+type Pair[T any] struct {
+	First  T
+	Second T
+}
+
+func NewPair[T any](first, second T) Pair[T] {
+	return Pair[T]{
+		First:  first,
+		Second: second,
+	}
 }
