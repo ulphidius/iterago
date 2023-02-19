@@ -183,3 +183,34 @@ func TestNewPair(t *testing.T) {
 		})
 	}
 }
+
+func TestNewEnumPair(t *testing.T) {
+	type args struct {
+		index uint
+		value int
+	}
+	tests := []struct {
+		name string
+		args args
+		want EnumPair[int]
+	}{
+		{
+			name: "OK",
+			args: args{
+				index: 0,
+				value: 10,
+			},
+			want: EnumPair[int]{
+				Index: 0,
+				Value: 10,
+			},
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			result := NewEnumPair(testCase.args.index, testCase.args.value)
+			assert.Equal(t, testCase.want, result)
+		})
+	}
+}
