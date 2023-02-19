@@ -56,3 +56,16 @@ func NewPair[T any](first, second T) Pair[T] {
 		Second: second,
 	}
 }
+
+// Representation Pair value of an index and a value
+type EnumPair[T any] struct {
+	Index uint
+	Value T
+}
+
+func NewEnumPair[T any](index uint, value T) EnumPair[T] {
+	return EnumPair[T]{
+		Index: index,
+		Value: value,
+	}
+}
