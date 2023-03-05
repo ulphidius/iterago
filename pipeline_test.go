@@ -268,3 +268,103 @@ func ExampleMapReduce() {
 	fmt.Println(result)
 	// Output: 50
 }
+
+func TestPartitionForeach(t *testing.T) {
+	type args struct {
+		values []uint
+		filter func(uint) bool
+	}
+	type want struct {
+		validate   string
+		invalidate string
+	}
+	tests := []struct {
+		name string
+		args args
+		want want
+	}{
+		{
+			name: "OK",
+			args: args{
+				values: []uint{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
+				filter: func(u uint) bool { return u%2 == 0 },
+			},
+			want: want{
+				validate:   "validated values: 02468",
+				invalidate: "invalidated values: 13579",
+			},
+		},
+		{
+			name: "no values",
+			args: args{
+				filter: func(u uint) bool { return u%2 == 0 },
+			},
+			want: want{
+				validate:   "validated values: ",
+				invalidate: "invalidated values: ",
+			},
+		},
+		{
+			name: "all validated",
+			args: args{
+				values: []uint{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
+				filter: func(u uint) bool { return u >= 0 },
+			},
+			want: want{
+				validate:   "validated values: 0123456789",
+				invalidate: "invalidated values: ",
+			},
+		},
+		{
+			name: "all invalidated",
+			args: args{
+				values: []uint{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
+				filter: func(u uint) bool { return u < 0 },
+			},
+			want: want{
+				validate:   "validated values: ",
+				invalidate: "invalidated values: 0123456789",
+			},
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			validate := "validated values: "
+			invalidates := "invalidated values: "
+
+			PartitionForeach(testCase.args.values, PartitionForeachPredicates[uint]{
+				Filter: testCase.args.filter,
+				Validate: func(u uint) {
+					validate += fmt.Sprintf("%d", u)
+				},
+				Invalidates: func(u uint) {
+					invalidates += fmt.Sprintf("%d", u)
+				},
+			})
+
+			assert.Equal(t, testCase.want.validate, validate)
+			assert.Equal(t, testCase.want.invalidate, invalidates)
+		})
+	}
+}
+
+func ExamplePartitionForeach() {
+	values := []uint{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+	validateResult := "validated values: "
+	invalidated := "invalidated values: "
+
+	filter := func(u uint) bool { return u%2 == 0 }
+	validate := func(u uint) { validateResult += fmt.Sprintf("%d", u) }
+	invalidate := func(u uint) { invalidated += fmt.Sprintf("%d", u) }
+
+	PartitionForeach(values, PartitionForeachPredicates[uint]{
+		Filter:      filter,
+		Validate:    validate,
+		Invalidates: invalidate,
+	})
+
+	fmt.Println(validateResult + "\n" + invalidated)
+	// Output: validated values: 02468
+	// invalidated values: 13579
+}
