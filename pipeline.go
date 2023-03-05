@@ -1,53 +1,70 @@
 package iterago
 
-func FilterMap[T, G any](values []T, filterPredicate func(T) bool, mapPredicate func(T) G) []G {
+type FilterMapPredicates[T, G any] struct {
+	Filter func(T) bool
+	Map    func(T) G
+}
+
+type FilterReducePredicates[T any] struct {
+	Filter func(T) bool
+	Reduce func(T, T) T
+}
+
+type FilterFoldPredicates[T, G any] struct {
+	Filter func(T) bool
+	Fold   func(G, T) G
+}
+
+type MapReducePredicates[T, G any] struct {
+	Map    func(T) G
+	Reduce func(G, G) G
+}
+
+type MapFoldPrediactes[T, G, V any] struct {
+	Map  func(T) G
+	Fold func(V, G) V
+}
+
+func FilterMap[T, G any](values []T, predicates FilterMapPredicates[T, G]) []G {
 	if len(values) == 0 {
 		return nil
 	}
 
-	if filterPredicate(values[0]) {
-		return append([]G{mapPredicate(values[0])}, FilterMap(values[1:], filterPredicate, mapPredicate)...)
+	if predicates.Filter(values[0]) {
+		return append([]G{predicates.Map(values[0])}, FilterMap(values[1:], predicates)...)
 	}
 
-	return FilterMap(values[1:], filterPredicate, mapPredicate)
+	return FilterMap(values[1:], predicates)
 }
 
-func FilterReduce[T any](values []T, accumulator T, filterPredicate func(T) bool, reducePredicate func(T, T) T) T {
+func FilterReduce[T any](values []T, accumulator T, predicates FilterReducePredicates[T]) T {
 	if len(values) == 0 {
 		return accumulator
 	}
 
-	if filterPredicate(values[0]) {
-		return FilterReduce(values[1:], reducePredicate(accumulator, values[0]), filterPredicate, reducePredicate)
+	if predicates.Filter(values[0]) {
+		return FilterReduce(values[1:], predicates.Reduce(accumulator, values[0]), predicates)
 	}
 
-	return FilterReduce(values[1:], accumulator, filterPredicate, reducePredicate)
+	return FilterReduce(values[1:], accumulator, predicates)
 }
 
-func FilterFold[T, G any](values []T, accumulator G, filterPredicate func(T) bool, foldPredicate func(G, T) G) G {
+func FilterFold[T, G any](values []T, accumulator G, predicates FilterFoldPredicates[T, G]) G {
 	if len(values) == 0 {
 		return accumulator
 	}
 
-	if filterPredicate(values[0]) {
-		return FilterFold(values[1:], foldPredicate(accumulator, values[0]), filterPredicate, foldPredicate)
+	if predicates.Filter(values[0]) {
+		return FilterFold(values[1:], predicates.Fold(accumulator, values[0]), predicates)
 	}
 
-	return FilterFold(values[1:], accumulator, filterPredicate, foldPredicate)
+	return FilterFold(values[1:], accumulator, predicates)
 }
 
-func MapReduce[T, G any](values []T, accumulator G, mapPredicate func(T) G, reducePredicate func(G, G) G) G {
+func MapReduce[T, G any](values []T, accumulator G, predicates MapReducePredicates[T, G]) G {
 	if len(values) == 0 {
 		return accumulator
 	}
 
-	return MapReduce(values[1:], reducePredicate(accumulator, mapPredicate(values[0])), mapPredicate, reducePredicate)
-}
-
-func MapFold[T, G, V any](values []T, accumulator V, mapPredicate func(T) G, foldPredicate func(V, G) V) V {
-	if len(values) == 0 {
-		return accumulator
-	}
-
-	return MapFold(values[1:], foldPredicate(accumulator, mapPredicate(values[0])), mapPredicate, foldPredicate)
+	return MapReduce(values[1:], predicates.Reduce(accumulator, predicates.Map(values[0])), predicates)
 }
