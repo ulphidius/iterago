@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2023-03-05
+
+### Added
+
+- Foreach function to execute code without return
+- FilterMap function which merges the behavior of filter and map
+- FilterReduce function which merges the behavior of filter and reduce
+- FilterFold function which merges the behavior of filter and fold
+- MapReduce function which merges the behavior of map and reduce
+- PartitionForeach function which merges the behavior of partition and foreach
+
 ## [0.4.0] - 2023-02-19
 
 ### Added
@@ -36,9 +47,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Refactor Filter to stand alone function
-- Refactor Map to stand alone function
-- Refactor Reduce to stand alone function
+- Refactor Filter into stand alone function
+- Refactor Map into stand alone function
+- Refactor Reduce into stand alone function
 - Unwrap an Option now panic
 
 ### Removed
@@ -60,8 +71,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI
 - Generic Slice into Iterator function
 
-[unreleased]: https://github.com/ulphidius/iterago/compare/v0.4.0...master
-[0.3.0]:  https://github.com/ulphidius/iterago/compare/v0.3.0...v0.4.0
+[unreleased]: https://github.com/ulphidius/iterago/compare/v0.5.0...master
+[0.5.0]:  https://github.com/ulphidius/iterago/compare/v0.4.0...v0.5.0
+[0.4.0]:  https://github.com/ulphidius/iterago/compare/v0.3.0...v0.4.0
 [0.3.0]:  https://github.com/ulphidius/iterago/compare/v0.2.0...v0.3.0
 [0.2.0]:  https://github.com/ulphidius/iterago/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/ulphidius/iterago/releases/tag/v0.1.0
