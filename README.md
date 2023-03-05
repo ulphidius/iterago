@@ -45,10 +45,6 @@ result := iterago.Reduce(slice, 0, func(x, y uint) uint { return x + y })
 fmt.Println(result)
 ```
 
-### Chained function
-
-TODO
-
 ## Licence
 
 This project is under [MIT](https://opensource.org/licenses/mit-license.php) licence.
