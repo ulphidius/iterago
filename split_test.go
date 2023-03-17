@@ -1,6 +1,7 @@
 package iterago
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -55,4 +56,14 @@ func TestSplit(t *testing.T) {
 			assert.Equal(t, testCase.want, result)
 		})
 	}
+}
+
+func ExampleSplit() {
+	values := []uint{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+	var numberOfSplit uint = 3
+
+	result := Split(values, numberOfSplit)
+
+	fmt.Println(result)
+	// Output: [[0 1 2 3] [4 5 6 7] [8 9]]
 }
