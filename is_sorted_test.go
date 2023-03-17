@@ -11,6 +11,7 @@ func TestIsSorted(t *testing.T) {
 	type args struct {
 		values    []uint
 		predicate func(uint, uint) bool
+		threads   uint
 	}
 
 	tests := []struct {
@@ -23,6 +24,16 @@ func TestIsSorted(t *testing.T) {
 			args: args{
 				values:    []uint{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
 				predicate: func(u1, u2 uint) bool { return u1 <= u2 },
+				threads:   1,
+			},
+			want: true,
+		},
+		{
+			name: "OK - ASC Multithreads",
+			args: args{
+				values:    []uint{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
+				predicate: func(u1, u2 uint) bool { return u1 <= u2 },
+				threads:   3,
 			},
 			want: true,
 		},
@@ -31,6 +42,16 @@ func TestIsSorted(t *testing.T) {
 			args: args{
 				values:    []uint{9, 8, 7, 6, 5, 4, 3, 2, 1, 0},
 				predicate: func(u1, u2 uint) bool { return u1 >= u2 },
+				threads:   1,
+			},
+			want: true,
+		},
+		{
+			name: "OK - DESC Multithreads",
+			args: args{
+				values:    []uint{9, 8, 7, 6, 5, 4, 3, 2, 1, 0},
+				predicate: func(u1, u2 uint) bool { return u1 >= u2 },
+				threads:   3,
 			},
 			want: true,
 		},
@@ -39,6 +60,16 @@ func TestIsSorted(t *testing.T) {
 			args: args{
 				values:    []uint{0, 1, 2, 3, 4, 4, 5, 6, 7, 8, 8, 9},
 				predicate: func(u1, u2 uint) bool { return u1 <= u2 },
+				threads:   1,
+			},
+			want: true,
+		},
+		{
+			name: "OK - ASC with duplicates Multithreads",
+			args: args{
+				values:    []uint{0, 1, 2, 3, 4, 4, 5, 6, 7, 8, 8, 9},
+				predicate: func(u1, u2 uint) bool { return u1 <= u2 },
+				threads:   3,
 			},
 			want: true,
 		},
@@ -47,6 +78,16 @@ func TestIsSorted(t *testing.T) {
 			args: args{
 				values:    []uint{9, 8, 8, 7, 6, 5, 4, 3, 2, 2, 1, 0},
 				predicate: func(u1, u2 uint) bool { return u1 >= u2 },
+				threads:   1,
+			},
+			want: true,
+		},
+		{
+			name: "OK - DESC with duplicates Multithreads",
+			args: args{
+				values:    []uint{9, 8, 8, 7, 6, 5, 4, 3, 2, 2, 1, 0},
+				predicate: func(u1, u2 uint) bool { return u1 >= u2 },
+				threads:   3,
 			},
 			want: true,
 		},
@@ -55,6 +96,16 @@ func TestIsSorted(t *testing.T) {
 			args: args{
 				values:    []uint{0, 1, 2, 3, 10, 5, 6, 7, 8, 9},
 				predicate: func(u1, u2 uint) bool { return u1 <= u2 },
+				threads:   1,
+			},
+			want: false,
+		},
+		{
+			name: "invalid ASC Multithreads",
+			args: args{
+				values:    []uint{0, 1, 2, 3, 10, 5, 6, 7, 8, 9},
+				predicate: func(u1, u2 uint) bool { return u1 <= u2 },
+				threads:   3,
 			},
 			want: false,
 		},
@@ -63,6 +114,16 @@ func TestIsSorted(t *testing.T) {
 			args: args{
 				values:    []uint{2, 8, 7, 6, 5, 4, 3, 2, 1, 0},
 				predicate: func(u1, u2 uint) bool { return u1 >= u2 },
+				threads:   1,
+			},
+			want: false,
+		},
+		{
+			name: "invalid DESC Multithreads",
+			args: args{
+				values:    []uint{2, 8, 7, 6, 5, 4, 3, 2, 1, 0},
+				predicate: func(u1, u2 uint) bool { return u1 >= u2 },
+				threads:   3,
 			},
 			want: false,
 		},
@@ -71,6 +132,16 @@ func TestIsSorted(t *testing.T) {
 			args: args{
 				values:    []uint{1},
 				predicate: func(u1, u2 uint) bool { return u1 <= u2 },
+				threads:   1,
+			},
+			want: true,
+		},
+		{
+			name: "single value Multithreads",
+			args: args{
+				values:    []uint{1},
+				predicate: func(u1, u2 uint) bool { return u1 <= u2 },
+				threads:   3,
 			},
 			want: true,
 		},
@@ -87,6 +158,7 @@ func TestIsSorted(t *testing.T) {
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Run(testCase.name, func(t *testing.T) {
+				iteragoThreads = testCase.args.threads
 				assert.Equal(t, testCase.want, IsSorted(testCase.args.values, testCase.args.predicate))
 			})
 		})

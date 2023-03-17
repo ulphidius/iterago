@@ -11,6 +11,7 @@ func TestFind(t *testing.T) {
 	type args struct {
 		values    []uint
 		predicate func(uint) bool
+		threads   uint
 	}
 	tests := []struct {
 		name string
@@ -22,6 +23,16 @@ func TestFind(t *testing.T) {
 			args: args{
 				values:    []uint{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
 				predicate: func(u uint) bool { return u == 5 },
+				threads:   1,
+			},
+			want: NewOption[uint](5),
+		},
+		{
+			name: "OK - Multithreads",
+			args: args{
+				values:    []uint{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
+				predicate: func(u uint) bool { return u == 5 },
+				threads:   3,
 			},
 			want: NewOption[uint](5),
 		},
@@ -30,6 +41,16 @@ func TestFind(t *testing.T) {
 			args: args{
 				values:    []uint{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
 				predicate: func(u uint) bool { return u == 666 },
+				threads:   1,
+			},
+			want: NewNoneOption[uint](),
+		},
+		{
+			name: "not found - Multithreads",
+			args: args{
+				values:    []uint{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
+				predicate: func(u uint) bool { return u == 666 },
+				threads:   3,
 			},
 			want: NewNoneOption[uint](),
 		},
@@ -45,6 +66,7 @@ func TestFind(t *testing.T) {
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
+			iteragoThreads = testCase.args.threads
 			result := Find(testCase.args.values, testCase.args.predicate)
 			assert.Equal(t, testCase.want, result)
 		})
