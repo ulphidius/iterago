@@ -42,5 +42,5 @@ func mapper[T, G any](values []T, predicate func(T) G) []G {
 		return nil
 	}
 
-	return append([]G{predicate(values[0])}, Map(values[1:], predicate)...)
+	return append([]G{predicate(values[0])}, mapper(values[1:], predicate)...)
 }

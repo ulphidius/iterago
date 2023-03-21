@@ -59,6 +59,16 @@ func TestFind(t *testing.T) {
 			args: args{
 				values:    nil,
 				predicate: func(u uint) bool { return u == 5 },
+				threads:   1,
+			},
+			want: NewNoneOption[uint](),
+		},
+		{
+			name: "no values - Multithreads",
+			args: args{
+				values:    nil,
+				predicate: func(u uint) bool { return u == 5 },
+				threads:   3,
 			},
 			want: NewNoneOption[uint](),
 		},

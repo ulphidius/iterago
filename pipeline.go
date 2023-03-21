@@ -1,5 +1,7 @@
 package iterago
 
+import "sync"
+
 type FilterMapPredicates[T, G any] struct {
 	Filter func(T) bool
 	Map    func(T) G
@@ -36,11 +38,46 @@ func FilterMap[T, G any](values []T, predicates FilterMapPredicates[T, G]) []G {
 		return nil
 	}
 
-	if predicates.Filter(values[0]) {
-		return append([]G{predicates.Map(values[0])}, FilterMap(values[1:], predicates)...)
+	if iteragoThreads > 1 {
+		return filterMapMultithreads(iteragoThreads, values, predicates)
 	}
 
-	return FilterMap(values[1:], predicates)
+	return filterMap(values, predicates)
+}
+
+func filterMapMultithreads[T, G any](threads uint, values []T, predicates FilterMapPredicates[T, G]) []G {
+	size := getChunkSize(values, threads)
+	chunks := split(values, size)
+
+	var wg sync.WaitGroup
+	var mx sync.Mutex
+	var result []G
+	for _, chunk := range chunks {
+		wg.Add(1)
+
+		go func(c []T, pre FilterMapPredicates[T, G]) {
+			defer wg.Done()
+			tmp := filterMap(c, pre)
+			mx.Lock()
+			result = append(result, tmp...)
+			mx.Unlock()
+		}(chunk, predicates)
+	}
+	wg.Wait()
+
+	return result
+}
+
+func filterMap[T, G any](values []T, predicates FilterMapPredicates[T, G]) []G {
+	if len(values) == 0 {
+		return nil
+	}
+
+	if predicates.Filter(values[0]) {
+		return append([]G{predicates.Map(values[0])}, filterMap(values[1:], predicates)...)
+	}
+
+	return filterMap(values[1:], predicates)
 }
 
 func FilterReduce[T any](values []T, accumulator T, predicates FilterReducePredicates[T]) T {
@@ -48,13 +85,68 @@ func FilterReduce[T any](values []T, accumulator T, predicates FilterReducePredi
 		return accumulator
 	}
 
-	if predicates.Filter(values[0]) {
-		return FilterReduce(values[1:], predicates.Reduce(accumulator, values[0]), predicates)
+	if iteragoThreads > 1 {
+		return filterReduceMultithreads(iteragoThreads, values, accumulator, predicates)
 	}
 
-	return FilterReduce(values[1:], accumulator, predicates)
+	return *filterReduce(values, NewOption(accumulator), predicates)
 }
 
+func filterReduceMultithreads[T any](threads uint, values []T, accumulator T, predicates FilterReducePredicates[T]) T {
+	size := getChunkSize(values, threads)
+	chunks := split(values, size)
+
+	var wg sync.WaitGroup
+	var mx sync.Mutex
+	var result T
+	for index, chunk := range chunks {
+		wg.Add(1)
+
+		go func(i int, c []T, pre FilterReducePredicates[T]) {
+			defer wg.Done()
+			var tmp *T
+			if i == 0 {
+				tmp = filterReduce(c, NewOption(accumulator), pre)
+			} else {
+				tmp = filterReduce(c, NewNoneOption[T](), pre)
+			}
+
+			if tmp == nil {
+				return
+			}
+
+			mx.Lock()
+			result = pre.Reduce(result, *tmp)
+			mx.Unlock()
+		}(index, chunk, predicates)
+	}
+	wg.Wait()
+
+	return result
+}
+
+func filterReduce[T any](values []T, accumulator Option[T], predicates FilterReducePredicates[T]) *T {
+	if len(values) == 0 {
+		if accumulator.IsNone() {
+			return nil
+		}
+
+		tmp := accumulator.Unwrap()
+		return &tmp
+	}
+
+	if predicates.Filter(values[0]) {
+		if accumulator.IsNone() {
+			return filterReduce(values[1:], NewOption(values[0]), predicates)
+		}
+
+		return filterReduce(values[1:], NewOption(predicates.Reduce(accumulator.Unwrap(), values[0])), predicates)
+	}
+
+	return filterReduce(values[1:], accumulator, predicates)
+}
+
+// FilterFold currently doesn't support multithreading
 func FilterFold[T, G any](values []T, accumulator G, predicates FilterFoldPredicates[T, G]) G {
 	if len(values) == 0 {
 		return accumulator
@@ -72,7 +164,51 @@ func MapReduce[T, G any](values []T, accumulator G, predicates MapReducePredicat
 		return accumulator
 	}
 
-	return MapReduce(values[1:], predicates.Reduce(accumulator, predicates.Map(values[0])), predicates)
+	if iteragoThreads > 1 {
+		return mapReduceMultithreads(iteragoThreads, values, accumulator, predicates)
+	}
+
+	return mapReduce(values, NewOption(accumulator), predicates)
+}
+
+func mapReduceMultithreads[T, G any](threads uint, values []T, accumulator G, predicates MapReducePredicates[T, G]) G {
+	size := getChunkSize(values, threads)
+	chunks := split(values, size)
+
+	var wg sync.WaitGroup
+	var mx sync.Mutex
+	var result G
+	for index, chunk := range chunks {
+		wg.Add(1)
+
+		go func(i int, c []T, pre MapReducePredicates[T, G]) {
+			defer wg.Done()
+			var tmp G
+			if i == 0 {
+				tmp = mapReduce(c, NewOption(accumulator), pre)
+			} else {
+				tmp = mapReduce(c, NewNoneOption[G](), pre)
+			}
+			mx.Lock()
+			result = pre.Reduce(result, tmp)
+			mx.Unlock()
+		}(index, chunk, predicates)
+	}
+	wg.Wait()
+
+	return result
+}
+
+func mapReduce[T, G any](values []T, accumulator Option[G], predicates MapReducePredicates[T, G]) G {
+	if len(values) == 0 {
+		return accumulator.Unwrap()
+	}
+
+	if accumulator.IsNone() {
+		return mapReduce(values[1:], NewOption(predicates.Map(values[0])), predicates)
+	}
+
+	return mapReduce(values[1:], NewOption(predicates.Reduce(accumulator.Unwrap(), predicates.Map(values[0]))), predicates)
 }
 
 func PartitionForeach[T any](values []T, predicates PartitionForeachPredicates[T]) {
@@ -80,13 +216,43 @@ func PartitionForeach[T any](values []T, predicates PartitionForeachPredicates[T
 		return
 	}
 
+	if iteragoThreads > 1 {
+		partitionForeachMultithreads(iteragoThreads, values, predicates)
+		return
+	}
+
+	partitionForeach(values, predicates)
+}
+
+func partitionForeachMultithreads[T any](threads uint, values []T, predicates PartitionForeachPredicates[T]) {
+	size := getChunkSize(values, threads)
+	chunks := split(values, size)
+
+	var wg sync.WaitGroup
+	for _, chunk := range chunks {
+		wg.Add(1)
+
+		go func(c []T, pre PartitionForeachPredicates[T]) {
+			defer wg.Done()
+			partitionForeach(c, pre)
+
+		}(chunk, predicates)
+	}
+	wg.Wait()
+}
+
+func partitionForeach[T any](values []T, predicates PartitionForeachPredicates[T]) {
+	if len(values) == 0 {
+		return
+	}
+
 	if predicates.Filter(values[0]) {
 		predicates.Validate(values[0])
 
-		PartitionForeach(values[1:], predicates)
+		partitionForeach(values[1:], predicates)
 		return
 	}
 
 	predicates.Invalidates(values[0])
-	PartitionForeach(values[1:], predicates)
+	partitionForeach(values[1:], predicates)
 }

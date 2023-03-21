@@ -38,5 +38,5 @@ func foreach[T any](values []T, predicate func(T)) {
 
 	predicate(values[0])
 
-	Foreach(values[1:], predicate)
+	foreach(values[1:], predicate)
 }

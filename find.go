@@ -49,5 +49,5 @@ func find[T any](values []T, predicate func(T) bool) Option[T] {
 		return NewOption(values[0])
 	}
 
-	return Find(values[1:], predicate)
+	return find(values[1:], predicate)
 }

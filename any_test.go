@@ -63,14 +63,22 @@ func TestAny(t *testing.T) {
 			},
 			want: false,
 		},
+		{
+			name: "no values - Multithreads",
+			args: args{
+				values:    nil,
+				predicate: func(u uint) bool { return u > 0 },
+				threads:   2,
+			},
+			want: false,
+		},
 	}
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			t.Run(testCase.name, func(t *testing.T) {
-				result := Any(testCase.args.values, testCase.args.predicate)
-				assert.Equal(t, testCase.want, result)
-			})
+			iteragoThreads = testCase.args.threads
+			result := Any(testCase.args.values, testCase.args.predicate)
+			assert.Equal(t, testCase.want, result)
 		})
 	}
 }

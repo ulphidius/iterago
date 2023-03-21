@@ -9,7 +9,7 @@ func Any[T any](values []T, predicate func(T) bool) bool {
 	}
 
 	if iteragoThreads > 1 {
-		return allMultithreads(iteragoThreads, values, predicate)
+		return anyMultithreads(iteragoThreads, values, predicate)
 	}
 
 	return anyHelper(values, predicate)
