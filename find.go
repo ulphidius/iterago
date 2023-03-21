@@ -8,8 +8,8 @@ func Find[T any](values []T, predicate func(T) bool) Option[T] {
 		return NewNoneOption[T]()
 	}
 
-	if iteragoThreads > 1 {
-		return findMultithreads(iteragoThreads, values, predicate)
+	if IteragoThreads > 1 {
+		return findMultithreads(IteragoThreads, values, predicate)
 	}
 
 	return find(values, predicate)

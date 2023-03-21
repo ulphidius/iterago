@@ -57,7 +57,7 @@ func TestFilter(t *testing.T) {
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			iteragoThreads = testCase.args.threads
+			IteragoThreads = testCase.args.threads
 			result := Filter(testCase.args.values, testCase.args.predicate)
 			result = Sort(result, func(a, b uint) bool { return a >= b })
 			assert.Equal(t, testCase.want, result)
@@ -106,7 +106,7 @@ func BenchmarkFilter(b *testing.B) {
 	}
 
 	for n := 0; n < b.N; n += 1 {
-		iteragoThreads = 2
+		IteragoThreads = 2
 		Filter(values, func(u int) bool { return u > 1000 })
 	}
 }

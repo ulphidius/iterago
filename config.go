@@ -1,20 +1,23 @@
 package iterago
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 )
 
 // Defined number of thread used Iterago
-var iteragoThreads uint = 1
+var IteragoThreads uint = 1
 
 func init() {
+	fmt.Println("INIT", os.Getenv("ITERAGO_THREADS"))
 	threads, err := strconv.Atoi(os.Getenv("ITERAGO_THREADS"))
+	fmt.Println(threads)
 	if err != nil {
 		return
 	}
 
-	if threads > int(iteragoThreads) {
-		iteragoThreads = uint(threads)
+	if threads > int(IteragoThreads) {
+		IteragoThreads = uint(threads)
 	}
 }

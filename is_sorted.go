@@ -12,8 +12,8 @@ func IsSorted[T any](values []T, predicate func(T, T) bool) bool {
 		return true
 	}
 
-	if iteragoThreads > 1 {
-		return isSortedMultithreads(iteragoThreads, values, predicate)
+	if IteragoThreads > 1 {
+		return isSortedMultithreads(IteragoThreads, values, predicate)
 	}
 
 	return isSorted(values, predicate)

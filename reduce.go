@@ -7,8 +7,8 @@ func Reduce[T any](values []T, accumulator T, predicate func(T, T) T) T {
 		return accumulator
 	}
 
-	if iteragoThreads > 1 {
-		return reduceMultithreads(iteragoThreads, values, accumulator, predicate)
+	if IteragoThreads > 1 {
+		return reduceMultithreads(IteragoThreads, values, accumulator, predicate)
 	}
 
 	return reduce(values, NewOption(accumulator), predicate)

@@ -76,7 +76,7 @@ func TestFind(t *testing.T) {
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			iteragoThreads = testCase.args.threads
+			IteragoThreads = testCase.args.threads
 			result := Find(testCase.args.values, testCase.args.predicate)
 			assert.Equal(t, testCase.want, result)
 		})

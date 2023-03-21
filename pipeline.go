@@ -38,8 +38,8 @@ func FilterMap[T, G any](values []T, predicates FilterMapPredicates[T, G]) []G {
 		return nil
 	}
 
-	if iteragoThreads > 1 {
-		return filterMapMultithreads(iteragoThreads, values, predicates)
+	if IteragoThreads > 1 {
+		return filterMapMultithreads(IteragoThreads, values, predicates)
 	}
 
 	return filterMap(values, predicates)
@@ -85,8 +85,8 @@ func FilterReduce[T any](values []T, accumulator T, predicates FilterReducePredi
 		return accumulator
 	}
 
-	if iteragoThreads > 1 {
-		return filterReduceMultithreads(iteragoThreads, values, accumulator, predicates)
+	if IteragoThreads > 1 {
+		return filterReduceMultithreads(IteragoThreads, values, accumulator, predicates)
 	}
 
 	return *filterReduce(values, NewOption(accumulator), predicates)
@@ -164,8 +164,8 @@ func MapReduce[T, G any](values []T, accumulator G, predicates MapReducePredicat
 		return accumulator
 	}
 
-	if iteragoThreads > 1 {
-		return mapReduceMultithreads(iteragoThreads, values, accumulator, predicates)
+	if IteragoThreads > 1 {
+		return mapReduceMultithreads(IteragoThreads, values, accumulator, predicates)
 	}
 
 	return mapReduce(values, NewOption(accumulator), predicates)
@@ -216,8 +216,8 @@ func PartitionForeach[T any](values []T, predicates PartitionForeachPredicates[T
 		return
 	}
 
-	if iteragoThreads > 1 {
-		partitionForeachMultithreads(iteragoThreads, values, predicates)
+	if IteragoThreads > 1 {
+		partitionForeachMultithreads(IteragoThreads, values, predicates)
 		return
 	}
 

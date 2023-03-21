@@ -71,7 +71,7 @@ func TestReduce(t *testing.T) {
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			iteragoThreads = testCase.args.threads
+			IteragoThreads = testCase.args.threads
 			result := Reduce(testCase.args.values, testCase.args.def, testCase.args.predicate)
 			assert.Equal(t, testCase.want, result)
 		})
