@@ -1,5 +1,6 @@
 package iterago
 
+// Fold currently doesn't support multithreading
 func Fold[T, G any](values []T, accumulator G, predicate func(G, T) G) G {
 	if len(values) == 0 {
 		return accumulator

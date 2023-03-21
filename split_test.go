@@ -67,3 +67,46 @@ func ExampleSplit() {
 	fmt.Println(result)
 	// Output: [[0 1 2 3] [4 5 6 7] [8 9]]
 }
+
+func TestGetChunkSize(t *testing.T) {
+	type args struct {
+		values []uint
+		number uint
+	}
+
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{
+			name: "OK",
+			args: args{
+				values: []uint{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
+				number: 2,
+			},
+			want: 5,
+		},
+		{
+			name: "number bigger than values length",
+			args: args{
+				values: []uint{0},
+				number: 2,
+			},
+			want: 1,
+		},
+		{
+			name: "no values",
+			args: args{
+				number: 2,
+			},
+			want: 0,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			assert.Equal(t, testCase.want, getChunkSize(testCase.args.values, testCase.args.number))
+		})
+	}
+}

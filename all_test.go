@@ -11,6 +11,7 @@ func TestAll(t *testing.T) {
 	type args struct {
 		values    []uint
 		predicate func(uint) bool
+		threads   uint
 	}
 	tests := []struct {
 		name string
@@ -22,6 +23,16 @@ func TestAll(t *testing.T) {
 			args: args{
 				values:    []uint{1, 2, 3, 4},
 				predicate: func(u uint) bool { return u > 0 },
+				threads:   1,
+			},
+			want: true,
+		},
+		{
+			name: "OK - Multithreads",
+			args: args{
+				values:    []uint{1, 2, 3, 4},
+				predicate: func(u uint) bool { return u > 0 },
+				threads:   2,
 			},
 			want: true,
 		},
@@ -30,6 +41,16 @@ func TestAll(t *testing.T) {
 			args: args{
 				values:    []uint{1, 2, 0, 4},
 				predicate: func(u uint) bool { return u > 0 },
+				threads:   1,
+			},
+			want: false,
+		},
+		{
+			name: "with invalid values - Multithreads",
+			args: args{
+				values:    []uint{1, 2, 0, 4},
+				predicate: func(u uint) bool { return u > 0 },
+				threads:   2,
 			},
 			want: false,
 		},
@@ -38,6 +59,7 @@ func TestAll(t *testing.T) {
 			args: args{
 				values:    nil,
 				predicate: func(u uint) bool { return u > 0 },
+				threads:   1,
 			},
 			want: false,
 		},
@@ -46,6 +68,7 @@ func TestAll(t *testing.T) {
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Run(testCase.name, func(t *testing.T) {
+				iteragoThreads = testCase.args.threads
 				result := All(testCase.args.values, testCase.args.predicate)
 				assert.Equal(t, testCase.want, result)
 			})

@@ -1,5 +1,6 @@
 package iterago
 
+// Enumerate currently doesn't support multithreading
 func Enumerate[T any](values []T) []EnumPair[T] {
 	return enumerateHelper(values, 0)
 }

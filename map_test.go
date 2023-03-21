@@ -3,6 +3,7 @@ package iterago
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,6 +13,7 @@ func TestMap(t *testing.T) {
 	type args struct {
 		values    []uint
 		predicate func(uint) string
+		threads   uint
 	}
 
 	tests := []struct {
@@ -24,6 +26,16 @@ func TestMap(t *testing.T) {
 			args: args{
 				values:    []uint{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
 				predicate: func(u uint) string { return fmt.Sprintf("%d", u) },
+				threads:   1,
+			},
+			want: []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+		},
+		{
+			name: "OK - Multithreads",
+			args: args{
+				values:    []uint{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
+				predicate: func(u uint) string { return fmt.Sprintf("%d", u) },
+				threads:   3,
 			},
 			want: []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
 		},
@@ -38,7 +50,13 @@ func TestMap(t *testing.T) {
 	}
 
 	for _, testCase := range tests {
+		iteragoThreads = testCase.args.threads
 		result := Map(testCase.args.values, testCase.args.predicate)
+		result = Sort(result, func(a, b string) bool {
+			a1, _ := strconv.Atoi(a)
+			a2, _ := strconv.Atoi(b)
+			return a1 >= a2
+		})
 		assert.Equal(t, testCase.want, result)
 	}
 }

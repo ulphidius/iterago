@@ -5,6 +5,8 @@ package iterago
 // Predicate MUST be comparison between the first and the second value.
 //   - The comparison MUST check if the first value is bigger than the second value for ASC.
 //   - The comparison MUST check if the first value is smaller than the second value for DESC.
+//
+// Currently doesn't support multithreading
 func Sort[T any](values []T, predicate func(T, T) bool) []T {
 	if len(values) <= 1 {
 		return values
