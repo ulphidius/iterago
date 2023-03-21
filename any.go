@@ -8,8 +8,8 @@ func Any[T any](values []T, predicate func(T) bool) bool {
 		return false
 	}
 
-	if iteragoThreads > 1 {
-		return anyMultithreads(iteragoThreads, values, predicate)
+	if IteragoThreads > 1 {
+		return anyMultithreads(IteragoThreads, values, predicate)
 	}
 
 	return anyHelper(values, predicate)

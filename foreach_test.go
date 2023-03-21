@@ -45,7 +45,7 @@ func TestForeach(t *testing.T) {
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			iteragoThreads = testCase.args.thread
+			IteragoThreads = testCase.args.thread
 			mx := new(sync.Mutex)
 			result := ""
 			Foreach(testCase.args.values, func(value uint) {
@@ -54,7 +54,7 @@ func TestForeach(t *testing.T) {
 				mx.Unlock()
 			})
 
-			if iteragoThreads > 1 {
+			if IteragoThreads > 1 {
 				sortedResult := Sort(strings.Split(result, ","), func(a, b string) bool {
 					a1, _ := strconv.Atoi(a)
 					b1, _ := strconv.Atoi(b)

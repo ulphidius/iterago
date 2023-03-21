@@ -128,7 +128,7 @@ func TestZip(t *testing.T) {
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			iteragoThreads = testCase.args.threads
+			IteragoThreads = testCase.args.threads
 			result := Zip(testCase.args.first, testCase.args.second)
 			result = Sort(result, func(a, b Pair[Option[uint]]) bool {
 				if a.First.IsSome() {

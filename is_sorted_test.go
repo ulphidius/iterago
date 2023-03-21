@@ -158,7 +158,7 @@ func TestIsSorted(t *testing.T) {
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Run(testCase.name, func(t *testing.T) {
-				iteragoThreads = testCase.args.threads
+				IteragoThreads = testCase.args.threads
 				assert.Equal(t, testCase.want, IsSorted(testCase.args.values, testCase.args.predicate))
 			})
 		})

@@ -107,7 +107,7 @@ func TestPartition(t *testing.T) {
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			iteragoThreads = testCase.args.threads
+			IteragoThreads = testCase.args.threads
 			validated, invalidated := Partition(testCase.args.values, testCase.args.predicate)
 			validated = Sort(validated, func(a, b uint) bool { return a >= b })
 			invalidated = Sort(invalidated, func(a, b uint) bool { return a >= b })

@@ -8,8 +8,8 @@ func Zip[T any](first []T, second []T) []Pair[Option[T]] {
 		return nil
 	}
 
-	if iteragoThreads > 1 {
-		return zipMultithreads(iteragoThreads, first, second)
+	if IteragoThreads > 1 {
+		return zipMultithreads(IteragoThreads, first, second)
 	}
 
 	return zip(first, second)

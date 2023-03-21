@@ -9,8 +9,8 @@ func Filter[T any](values []T, predicate func(T) bool) []T {
 		return nil
 	}
 
-	if iteragoThreads > 1 {
-		return filterMultithreads(iteragoThreads, values, predicate)
+	if IteragoThreads > 1 {
+		return filterMultithreads(IteragoThreads, values, predicate)
 	}
 
 	return filter(values, predicate)

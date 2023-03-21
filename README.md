@@ -13,6 +13,11 @@
 go get github.com/ulphidius/iterago
 ```
 
+## Multihreading
+
+Iterago can execute its functions with a defined number of go routines.
+The number of go routine is defined by the environment variable **ITERAGO_THREADS**.
+
 ## Examples
 
 ### Filter

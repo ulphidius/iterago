@@ -50,7 +50,7 @@ func TestMap(t *testing.T) {
 	}
 
 	for _, testCase := range tests {
-		iteragoThreads = testCase.args.threads
+		IteragoThreads = testCase.args.threads
 		result := Map(testCase.args.values, testCase.args.predicate)
 		result = Sort(result, func(a, b string) bool {
 			a1, _ := strconv.Atoi(a)

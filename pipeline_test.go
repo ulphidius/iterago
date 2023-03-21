@@ -83,7 +83,7 @@ func TestFilterMap(t *testing.T) {
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			iteragoThreads = testCase.args.threads
+			IteragoThreads = testCase.args.threads
 			result := FilterMap(testCase.args.values, FilterMapPredicates[uint, string]{
 				Filter: testCase.args.filter,
 				Map:    testCase.args.mapper,
@@ -193,7 +193,7 @@ func TestFilterReduce(t *testing.T) {
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			iteragoThreads = testCase.args.threads
+			IteragoThreads = testCase.args.threads
 			result := FilterReduce(testCase.args.values, testCase.args.acc, FilterReducePredicates[uint]{
 				Filter: testCase.args.filter,
 				Reduce: testCase.args.reduce,
@@ -355,7 +355,7 @@ func TestMapReduce(t *testing.T) {
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			iteragoThreads = testCase.args.threads
+			IteragoThreads = testCase.args.threads
 			result := MapReduce(testCase.args.values, testCase.args.acc, MapReducePredicates[string, uint]{
 				Map:    testCase.args.mapper,
 				Reduce: testCase.args.reduce,
@@ -503,7 +503,7 @@ func TestPartitionForeach(t *testing.T) {
 			var foreachResultValidated []testSample
 			var foreachResultInvalidated []testSample
 
-			iteragoThreads = testCase.args.threads
+			IteragoThreads = testCase.args.threads
 			PartitionForeach(testCase.args.values, PartitionForeachPredicates[uint]{
 				Filter: testCase.args.filter,
 				Validate: func(u uint) {

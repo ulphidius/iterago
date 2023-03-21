@@ -7,8 +7,8 @@ func Map[T, G any](values []T, predicate func(T) G) []G {
 		return nil
 	}
 
-	if iteragoThreads > 1 {
-		return mapperMultithreads(iteragoThreads, values, predicate)
+	if IteragoThreads > 1 {
+		return mapperMultithreads(IteragoThreads, values, predicate)
 	}
 
 	return mapper(values, predicate)

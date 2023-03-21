@@ -8,8 +8,8 @@ func Partition[T any](values []T, predicate func(T) bool) (validated []T, invali
 		return nil, nil
 	}
 
-	if iteragoThreads > 1 {
-		return partitionMultithreads(iteragoThreads, values, predicate)
+	if IteragoThreads > 1 {
+		return partitionMultithreads(IteragoThreads, values, predicate)
 	}
 
 	return partition(values, predicate)

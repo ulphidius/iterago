@@ -7,8 +7,8 @@ func Foreach[T any](values []T, predicate func(T)) {
 		return
 	}
 
-	if iteragoThreads > 1 {
-		foreachMultithreads(iteragoThreads, values, predicate)
+	if IteragoThreads > 1 {
+		foreachMultithreads(IteragoThreads, values, predicate)
 		return
 	}
 
