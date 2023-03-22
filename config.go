@@ -1,7 +1,6 @@
 package iterago
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 )
