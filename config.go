@@ -1,7 +1,6 @@
 package iterago
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 )
@@ -10,9 +9,7 @@ import (
 var IteragoThreads uint = 1
 
 func init() {
-	fmt.Println("INIT", os.Getenv("ITERAGO_THREADS"))
 	threads, err := strconv.Atoi(os.Getenv("ITERAGO_THREADS"))
-	fmt.Println(threads)
 	if err != nil {
 		return
 	}

@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2023-03-22
+
+### Fixed
+
+- Remove debug which flood stdout
+
 ## [0.6.0] - 2023-03-22
 
-## Added
+### Added
 
 - Multithreading for many functions. The number of go routine spawned by iterago function is defined by the environment variable **ITERAGO_THREADS**
 
@@ -77,7 +83,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI
 - Generic Slice into Iterator function
 
-[unreleased]: https://github.com/ulphidius/iterago/compare/v0.6.0...master
+[unreleased]: https://github.com/ulphidius/iterago/compare/v0.6.1...master
+[0.6.1]:  https://github.com/ulphidius/iterago/compare/v0.6.0...v0.6.1
 [0.6.0]:  https://github.com/ulphidius/iterago/compare/v0.5.0...v0.6.0
 [0.5.0]:  https://github.com/ulphidius/iterago/compare/v0.4.0...v0.5.0
 [0.4.0]:  https://github.com/ulphidius/iterago/compare/v0.3.0...v0.4.0
