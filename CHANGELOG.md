@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2023-03-27
+
+### Added
+
+- Unique which allow you to remove duplicated values
+- UniqueMerge to merge all duplicated values with an agregate function
+
 ## [0.6.1] - 2023-03-22
 
 ### Fixed
@@ -83,7 +90,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI
 - Generic Slice into Iterator function
 
-[unreleased]: https://github.com/ulphidius/iterago/compare/v0.6.1...master
+[unreleased]: https://github.com/ulphidius/iterago/compare/v0.7.0...master
+[0.6.1]:  https://github.com/ulphidius/iterago/compare/v0.6.1...v0.7.0
 [0.6.1]:  https://github.com/ulphidius/iterago/compare/v0.6.0...v0.6.1
 [0.6.0]:  https://github.com/ulphidius/iterago/compare/v0.5.0...v0.6.0
 [0.5.0]:  https://github.com/ulphidius/iterago/compare/v0.4.0...v0.5.0
