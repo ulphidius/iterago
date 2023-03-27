@@ -565,3 +565,141 @@ func ExamplePartitionForeach() {
 	// Output: validated values: 02468
 	// invalidated values: 13579
 }
+
+func TestUniqueMerge(t *testing.T) {
+	type sample struct {
+		id    uint
+		value uint
+	}
+	type args struct {
+		values     []sample
+		identifier func(sample) uint
+		merge      func(sample, sample) sample
+	}
+	tests := []struct {
+		name string
+		args args
+		want []sample
+	}{
+		{
+			name: "OK",
+			args: args{
+				values: []sample{
+					{
+						id:    0,
+						value: 10,
+					},
+					{
+						id:    1,
+						value: 20,
+					},
+					{
+						id:    2,
+						value: 30,
+					},
+					{
+						id:    1,
+						value: 40,
+					},
+					{
+						id:    0,
+						value: 15,
+					},
+					{
+						id:    4,
+						value: 50,
+					},
+				},
+				identifier: func(s sample) uint { return s.id },
+				merge: func(s1, s2 sample) sample {
+					return sample{
+						id:    s1.id,
+						value: s1.value + s2.value,
+					}
+				},
+			},
+			want: []sample{
+				{
+					id:    0,
+					value: 25,
+				},
+				{
+					id:    1,
+					value: 60,
+				},
+				{
+					id:    2,
+					value: 30,
+				},
+				{
+					id:    4,
+					value: 50,
+				},
+			},
+		},
+		{
+			name: "no values",
+			args: args{
+				identifier: func(s sample) uint { return s.id },
+				merge: func(s1, s2 sample) sample {
+					return sample{
+						id:    s1.id,
+						value: s1.value + s2.value,
+					}
+				},
+			},
+			want: nil,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			result := UniqueMerge(testCase.args.values, UniqueMergePredicates[sample, uint]{
+				Identifier: testCase.args.identifier,
+				Merge:      testCase.args.merge,
+			})
+			result = Sort(result, func(a, b sample) bool { return a.id >= b.id })
+			assert.Equal(t, testCase.want, result)
+		})
+	}
+}
+
+func ExampleUniqueMerge() {
+	type sample struct {
+		id    uint
+		value uint
+	}
+	values := []sample{
+		{
+			id:    0,
+			value: 10,
+		},
+		{
+			id:    1,
+			value: 20,
+		},
+		{
+			id:    2,
+			value: 30,
+		},
+		{
+			id:    1,
+			value: 40,
+		},
+		{
+			id:    0,
+			value: 15,
+		},
+		{
+			id:    4,
+			value: 50,
+		},
+	}
+	result := UniqueMerge(values, UniqueMergePredicates[sample, uint]{
+		Identifier: func(s sample) uint { return s.id },
+		Merge:      func(s1, s2 sample) sample { return sample{id: s1.id, value: s1.value + s2.value} },
+	})
+	result = Sort(result, func(a, b sample) bool { return a.id >= b.id })
+	fmt.Println(result)
+	// Output: [{0 25} {1 60} {2 30} {4 50}]
+}
