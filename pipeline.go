@@ -33,6 +33,11 @@ type PartitionForeachPredicates[T any] struct {
 	Invalidates func(T) // Foreach predicate for invalid values
 }
 
+type UniqueMergePredicates[T any, G Comparable] struct {
+	Identifier func(T) G
+	Merge      func(T, T) T
+}
+
 func FilterMap[T, G any](values []T, predicates FilterMapPredicates[T, G]) []G {
 	if len(values) == 0 {
 		return nil
@@ -255,4 +260,34 @@ func partitionForeach[T any](values []T, predicates PartitionForeachPredicates[T
 
 	predicates.Invalidates(values[0])
 	partitionForeach(values[1:], predicates)
+}
+
+// UniqueMerge currently doesn't support multithreading
+func UniqueMerge[T any, G Comparable](values []T, predicates UniqueMergePredicates[T, G]) []T {
+	if len(values) == 0 {
+		return nil
+	}
+
+	mapper := uniqueMergeHelper(values, predicates, map[G]T{})
+	result := []T{}
+	for _, value := range mapper {
+		result = append(result, value)
+	}
+
+	return result
+}
+
+func uniqueMergeHelper[T any, G Comparable](values []T, predicates UniqueMergePredicates[T, G], mapper map[G]T) map[G]T {
+	if len(values) == 0 {
+		return mapper
+	}
+
+	key := predicates.Identifier(values[0])
+	if _, ok := mapper[key]; ok {
+		mapper[key] = predicates.Merge(mapper[key], values[0])
+		return uniqueMergeHelper(values[1:], predicates, mapper)
+	}
+
+	mapper[key] = values[0]
+	return uniqueMergeHelper(values[1:], predicates, mapper)
 }
