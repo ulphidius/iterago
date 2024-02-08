@@ -3,7 +3,7 @@ package iterago
 import "sync"
 
 // Zip allow you to merge to array into an array of Pair
-func Zip[T any](first []T, second []T) []Pair[Option[T]] {
+func Zip[T, G any](first []T, second []G) []Pair[Option[T], Option[G]] {
 	if len(first) == 0 && len(second) == 0 {
 		return nil
 	}
@@ -15,7 +15,7 @@ func Zip[T any](first []T, second []T) []Pair[Option[T]] {
 	return zip(first, second)
 }
 
-func zipMultithreads[T any](threads uint, first []T, second []T) (result []Pair[Option[T]]) {
+func zipMultithreads[T, G any](threads uint, first []T, second []G) (result []Pair[Option[T], Option[G]]) {
 	firstChunks, secondChunks := zipGetChunks(first, second, threads)
 	maxLenght := func(f int, s int) int {
 		if f > s {
@@ -32,15 +32,15 @@ func zipMultithreads[T any](threads uint, first []T, second []T) (result []Pair[
 
 		go func(index int) {
 			defer wg.Done()
-			var tmp []Pair[Option[T]] = nil
+			var tmp []Pair[Option[T], Option[G]] = nil
 			if index > len(firstChunks)-1 {
-				tmp = zip(nil, secondChunks[index])
+				tmp = zip[T, G](nil, secondChunks[index])
 			}
 			if index > len(secondChunks)-1 {
-				tmp = zip(firstChunks[index], nil)
+				tmp = zip[T, G](firstChunks[index], nil)
 			}
 			if tmp == nil {
-				tmp = zip(firstChunks[index], secondChunks[index])
+				tmp = zip[T, G](firstChunks[index], secondChunks[index])
 			}
 			mx.Lock()
 			result = append(result, tmp...)
@@ -52,7 +52,7 @@ func zipMultithreads[T any](threads uint, first []T, second []T) (result []Pair[
 	return
 }
 
-func zipGetChunks[T any](first, second []T, threads uint) ([][]T, [][]T) {
+func zipGetChunks[T, G any](first []T, second []G, threads uint) ([][]T, [][]G) {
 	if len(first) == 0 {
 		secondSize := getChunkSize(second, threads)
 		return nil, split(second, secondSize)
@@ -71,37 +71,37 @@ func zipGetChunks[T any](first, second []T, threads uint) ([][]T, [][]T) {
 	return firstChunks, secondChunks
 }
 
-func zip[T any](first []T, second []T) []Pair[Option[T]] {
+func zip[T, G any](first []T, second []G) []Pair[Option[T], Option[G]] {
 	if len(first) == 0 && len(second) == 0 {
 		return nil
 	}
 
 	if len(first) == 0 {
 		return append(
-			[]Pair[Option[T]]{
+			[]Pair[Option[T], Option[G]]{
 				NewPair(
 					NewNoneOption[T](),
 					NewOption(second[0]),
 				),
 			},
-			zip(nil, second[1:])...,
+			zip[T, G](nil, second[1:])...,
 		)
 	}
 
 	if len(second) == 0 {
 		return append(
-			[]Pair[Option[T]]{
+			[]Pair[Option[T], Option[G]]{
 				NewPair(
 					NewOption(first[0]),
-					NewNoneOption[T](),
+					NewNoneOption[G](),
 				),
 			},
-			zip(first[1:], nil)...,
+			zip[T, G](first[1:], nil)...,
 		)
 	}
 
 	return append(
-		[]Pair[Option[T]]{
+		[]Pair[Option[T], Option[G]]{
 			NewPair(
 				NewOption(first[0]),
 				NewOption(second[0]),
@@ -109,4 +109,16 @@ func zip[T any](first []T, second []T) []Pair[Option[T]] {
 		},
 		zip(first[1:], second[1:])...,
 	)
+}
+
+func MapIntoZip[T Comparable, G any](m map[T]G) []Pair[Option[T], Option[G]] {
+	keys := []T{}
+	values := []G{}
+
+	for key, value := range m {
+		keys = append(keys, key)
+		values = append(values, value)
+	}
+
+	return Zip(keys, values)
 }

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2024-02-08
+
+### Added
+
+- MapIntoZip which convert a map into a list of Pair
+
+### Changed
+
+- Pair elements can now be of different types
+- Function prototypes which use Pair are updated
+
 ## [0.7.0] - 2023-03-27
 
 ### Added

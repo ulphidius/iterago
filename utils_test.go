@@ -161,7 +161,7 @@ func TestNewPair(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want Pair[uint]
+		want Pair[uint, uint]
 	}{
 		{
 			name: "OK",
@@ -169,7 +169,7 @@ func TestNewPair(t *testing.T) {
 				first:  1,
 				second: 2,
 			},
-			want: Pair[uint]{
+			want: Pair[uint, uint]{
 				First:  1,
 				Second: 2,
 			},
@@ -180,6 +180,36 @@ func TestNewPair(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			result := NewPair(testCase.args.first, testCase.args.second)
 			assert.Equal(t, testCase.want, result)
+		})
+	}
+}
+
+func TestNewPairUnwrap(t *testing.T) {
+	type want struct {
+		first  uint
+		second string
+	}
+
+	tests := []struct {
+		name string
+		args Pair[uint, string]
+		want want
+	}{
+		{
+			name: "OK",
+			args: Pair[uint, string]{First: 10, Second: "ten"},
+			want: want{
+				first:  10,
+				second: "ten",
+			},
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			firstResult, secondResult := testCase.args.Unwrap()
+			assert.Equal(t, testCase.want.first, firstResult)
+			assert.Equal(t, testCase.want.second, secondResult)
 		})
 	}
 }
