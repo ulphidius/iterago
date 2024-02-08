@@ -44,17 +44,22 @@ func (opt Option[T]) Unwrap() T {
 	return opt.Value
 }
 
-// Representation of 2 values of the same type
-type Pair[T any] struct {
+// Representation of 2 values
+type Pair[T, G any] struct {
 	First  T
-	Second T
+	Second G
 }
 
-func NewPair[T any](first, second T) Pair[T] {
-	return Pair[T]{
+func NewPair[T, G any](first T, second G) Pair[T, G] {
+	return Pair[T, G]{
 		First:  first,
 		Second: second,
 	}
+}
+
+// Retrived Pair values as a tuple
+func (pair Pair[T, G]) Unwrap() (T, G) {
+	return pair.First, pair.Second
 }
 
 // Representation Pair value of an index and a value
