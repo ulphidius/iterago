@@ -169,7 +169,15 @@ func TestMapIntoZip(t *testing.T) {
 
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
-			result := MapIntoZip(testCase.args)
+			result := Sort(MapIntoZip(testCase.args), func(p1, p2 Pair[Option[string], Option[int]]) bool {
+				if p1.Second.IsSome() && p2.Second.IsSome() {
+					_, v1 := p1.Unwrap()
+					_, v2 := p2.Unwrap()
+					return v1.Unwrap() >= v2.Unwrap()
+				}
+
+				return false
+			})
 			assert.Equal(t, testCase.want, result)
 		})
 	}
