@@ -74,3 +74,22 @@ func NewEnumPair[T any](index uint, value T) EnumPair[T] {
 		Value: value,
 	}
 }
+
+// MapIntoList convert a map into two list which contain the keys and the value
+//
+// currently doesn't support multithreading
+func MapIntoList[T Comparable, G any](m map[T]G) ([]T, []G) {
+	if len(m) == 0 {
+		return nil, nil
+	}
+
+	keys := []T{}
+	values := []G{}
+
+	for key, value := range m {
+		keys = append(keys, key)
+		values = append(values, value)
+	}
+
+	return keys, values
+}
