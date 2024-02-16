@@ -1,6 +1,7 @@
 package iterago
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -243,4 +244,60 @@ func TestNewEnumPair(t *testing.T) {
 			assert.Equal(t, testCase.want, result)
 		})
 	}
+}
+
+func TestMapIntoList(t *testing.T) {
+	type want struct {
+		x []string
+		y []int64
+	}
+
+	tests := []struct {
+		name string
+		args map[string]int64
+		want want
+	}{
+		{
+			name: "OK",
+			args: map[string]int64{
+				"i": 1,
+				"c": 2,
+				"p": 3,
+			},
+			want: want{
+				x: []string{"i", "c", "p"},
+				y: []int64{1, 2, 3},
+			},
+		},
+		{
+			name: "empty map",
+			args: map[string]int64{},
+			want: want{},
+		},
+		{
+			name: "nil map",
+			args: nil,
+			want: want{},
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			result1, result2 := MapIntoList(testCase.args)
+
+			assert.ElementsMatch(t, testCase.want.x, result1)
+			assert.ElementsMatch(t, testCase.want.y, result2)
+		})
+	}
+}
+
+func ExampleMapIntoList() {
+	values := map[string]int64{
+		"i":  1,
+		"c":  2,
+		"cc": 3,
+	}
+
+	// Output: [i c cc] [1 2 3]
+	fmt.Println(MapIntoList(values))
 }
