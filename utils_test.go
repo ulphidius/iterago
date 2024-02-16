@@ -284,8 +284,9 @@ func TestMapIntoList(t *testing.T) {
 	for _, testCase := range tests {
 		t.Run(testCase.name, func(t *testing.T) {
 			result1, result2 := MapIntoList(testCase.args)
-			assert.EqualValues(t, testCase.want.x, result1)
-			assert.EqualValues(t, testCase.want.y, result2)
+
+			assert.ElementsMatch(t, testCase.want.x, result1)
+			assert.ElementsMatch(t, testCase.want.y, result2)
 		})
 	}
 }
