@@ -93,3 +93,39 @@ func MapIntoList[T Comparable, G any](m map[T]G) ([]T, []G) {
 
 	return keys, values
 }
+
+// ListIntoHashSet convert a list of value into a HashSet.
+// A HashSet is HashMap with only the keys defined. To simplified the check if
+//
+// currently doesn't support multithreading
+func ListIntoHashSet[T Comparable](values []T) map[T]bool {
+	if len(values) == 0 {
+		return nil
+	}
+
+	result := ListIntoHashSet(values[1:])
+	if result == nil {
+		result = map[T]bool{}
+	}
+
+	result[values[0]] = true
+
+	return result
+}
+
+// ListIntoHashSet convert a map into a HashSet.
+// A HashSet is HashMap with only the keys defined. To simplified the check if
+//
+// currently doesn't support multithreading
+func MapIntoHashSet[T Comparable, G any](values map[T]G) map[T]bool {
+	if len(values) == 0 {
+		return nil
+	}
+
+	keys := []T{}
+	for key, _ := range values {
+		keys = append(keys, key)
+	}
+
+	return ListIntoHashSet(keys)
+}
