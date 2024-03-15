@@ -45,7 +45,7 @@ func filter[T any](values []T, predicate func(T) bool) []T {
 	}
 
 	if predicate(values[0]) {
-		return append(values[:1], filter(values[1:], predicate)...)
+		return append([]T{values[0]}, filter(values[1:], predicate)...)
 	}
 
 	return filter(values[1:], predicate)

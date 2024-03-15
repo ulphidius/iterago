@@ -292,14 +292,21 @@ func TestMapIntoList(t *testing.T) {
 }
 
 func ExampleMapIntoList() {
-	values := map[string]int64{
-		"i":  1,
-		"c":  2,
-		"cc": 3,
+	origin := map[string]int64{
+		"c":   1,
+		"cc":  2,
+		"ccc": 3,
 	}
 
-	// Output: [i c cc] [1 2 3]
-	fmt.Println(MapIntoList(values))
+	keys, values := MapIntoList(origin)
+
+	keys = Sort(keys, func(s1, s2 string) bool { return len(s1) > len(s2) })
+	values = Sort(values, func(i1, i2 int64) bool { return i1 > i2 })
+
+	// Output: [c cc ccc]
+	// [1 2 3]
+	fmt.Println(keys)
+	fmt.Println(values)
 }
 
 func TestListIntoHashSet(t *testing.T) {
