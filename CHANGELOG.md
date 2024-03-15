@@ -117,7 +117,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Generic Slice into Iterator function
 
 [unreleased]: https://github.com/ulphidius/iterago/compare/v0.9.1...master
-[0.9.0]:  https://github.com/ulphidius/iterago/compare/v0.9.0...v0.9.1
+[0.9.1]:  https://github.com/ulphidius/iterago/compare/v0.9.0...v0.9.1
 [0.9.0]:  https://github.com/ulphidius/iterago/compare/v0.8.0...v0.9.0
 [0.8.0]:  https://github.com/ulphidius/iterago/compare/v0.7.0...v0.8.0
 [0.7.0]:  https://github.com/ulphidius/iterago/compare/v0.6.1...v0.7.0
